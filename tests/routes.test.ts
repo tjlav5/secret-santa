@@ -14,15 +14,268 @@ interface SqliteDatabase {
   exec(sql: string): void;
 }
 
-function createMemoryD1(): D1Database {
-  const { DatabaseSync } = (
+function createPureMemoryD1(): D1Database {
+  const tables: Record<string, Record<string, unknown>[]> = {
+    events: [],
+    participants: [],
+    exclusions: [],
+    qa_messages: [],
+  };
+
+  const defaults: Record<string, () => Record<string, unknown>> = {
+    events: () => ({
+      budget: '',
+      exchange_date: '',
+      notes: '',
+      join_code: null,
+      join_enabled: 1,
+      allow_spoilers: 0,
+      status: 'draft',
+      created_at: new Date().toISOString(),
+      drawn_at: null,
+    }),
+    participants: () => ({
+      wishlist_notes: '',
+      wishlist_links: '[]',
+      assigned_to_id: null,
+      encrypted_assignment: '',
+      unwrapped_at: null,
+      created_at: new Date().toISOString(),
+    }),
+    exclusions: () => ({
+      created_at: new Date().toISOString(),
+    }),
+    qa_messages: () => ({
+      answer: null,
+      created_at: new Date().toISOString(),
+      answered_at: null,
+    }),
+  };
+
+  function execQuery(rawSql: string, args: unknown[]): Record<string, unknown>[] {
+    const sql = rawSql.replace(/\s+/g, ' ').trim();
+
+    if (/^(CREATE|ALTER|DROP)\b/i.test(sql)) return [];
+    const pragmaMatch = sql.match(/^PRAGMA table_info\((\w+)\)/i);
+    if (pragmaMatch) {
+      const sample = defaults[pragmaMatch[1]]?.() || {};
+      return ['id', 'event_id', 'title', 'organizer_name', 'admin_key', 'name', 'token', 'participant_id', 'excluded_participant_id', 'recipient_id', 'question', ...Object.keys(sample)].map((name) => ({ name }));
+    }
+
+    const insertMatch = sql.match(/^INSERT(?: OR IGNORE)? INTO (\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i);
+    if (insertMatch) {
+      const [, table, colsRaw, valsRaw] = insertMatch;
+      const cols = colsRaw.split(',').map((c) => c.trim());
+      const valTokens = valsRaw.split(',').map((v) => v.trim());
+      const row: Record<string, unknown> = { ...(defaults[table]?.() || {}) };
+      let argIdx = 0;
+      cols.forEach((col, i) => {
+        const tok = valTokens[i];
+        if (tok === '?') {
+          row[col] = args[argIdx++];
+        } else if (/^'.*'$/.test(tok)) {
+          row[col] = tok.slice(1, -1);
+        } else if (/^\d+$/.test(tok)) {
+          row[col] = Number(tok);
+        } else if (/^NULL$/i.test(tok)) {
+          row[col] = null;
+        }
+      });
+      tables[table] = tables[table] || [];
+      tables[table].push(row);
+      return [];
+    }
+
+    if (/^DELETE FROM qa_messages WHERE event_id = \?$/i.test(sql)) {
+      tables.qa_messages = tables.qa_messages.filter((r) => r.event_id !== args[0]);
+      return [];
+    }
+    if (/^DELETE FROM exclusions WHERE id = \? AND event_id = \?$/i.test(sql)) {
+      tables.exclusions = tables.exclusions.filter((r) => !(r.id === args[0] && r.event_id === args[1]));
+      return [];
+    }
+    if (/^DELETE FROM participants WHERE id = \? AND event_id = \?$/i.test(sql)) {
+      tables.participants = tables.participants.filter((r) => !(r.id === args[0] && r.event_id === args[1]));
+      return [];
+    }
+    if (/^DELETE FROM exclusions WHERE event_id = \?/i.test(sql)) {
+      tables.exclusions = tables.exclusions.filter(
+        (r) => !(r.event_id === args[0] && (r.participant_id === args[1] || r.excluded_participant_id === args[2]))
+      );
+      return [];
+    }
+
+    if (/^UPDATE events SET join_code = \? WHERE id = \?$/i.test(sql)) {
+      tables.events.forEach((r) => { if (r.id === args[1]) r.join_code = args[0]; });
+      return [];
+    }
+    if (/^UPDATE events SET join_enabled = \? WHERE id = \?$/i.test(sql)) {
+      tables.events.forEach((r) => { if (r.id === args[1]) r.join_enabled = args[0]; });
+      return [];
+    }
+    if (/^UPDATE events SET title = \?, organizer_name = \?, budget = \?, exchange_date = \?, notes = \?, allow_spoilers = \? WHERE id = \?$/i.test(sql)) {
+      tables.events.forEach((r) => {
+        if (r.id === args[6]) {
+          [r.title, r.organizer_name, r.budget, r.exchange_date, r.notes, r.allow_spoilers] = args;
+        }
+      });
+      return [];
+    }
+    if (/^UPDATE events SET status = 'drawn'/i.test(sql)) {
+      tables.events.forEach((r) => {
+        if (r.id === args[0]) {
+          r.status = 'drawn';
+          r.drawn_at = new Date().toISOString();
+        }
+      });
+      return [];
+    }
+    if (/^UPDATE events SET status = 'draft'/i.test(sql)) {
+      tables.events.forEach((r) => {
+        if (r.id === args[0]) {
+          r.status = 'draft';
+          r.drawn_at = null;
+        }
+      });
+      return [];
+    }
+    if (/^UPDATE participants SET assigned_to_id = NULL, encrypted_assignment = \?, unwrapped_at = NULL WHERE id = \? AND event_id = \?$/i.test(sql)) {
+      tables.participants.forEach((r) => {
+        if (r.id === args[1] && r.event_id === args[2]) {
+          r.assigned_to_id = null;
+          r.encrypted_assignment = args[0];
+          r.unwrapped_at = null;
+        }
+      });
+      return [];
+    }
+    if (/^UPDATE participants SET assigned_to_id = NULL, encrypted_assignment = '', unwrapped_at = NULL WHERE event_id = \?$/i.test(sql)) {
+      tables.participants.forEach((r) => {
+        if (r.event_id === args[0]) {
+          r.assigned_to_id = null;
+          r.encrypted_assignment = '';
+          r.unwrapped_at = null;
+        }
+      });
+      return [];
+    }
+    if (/^UPDATE participants SET unwrapped_at = COALESCE/i.test(sql)) {
+      tables.participants.forEach((r) => {
+        if (r.id === args[0] && !r.unwrapped_at) r.unwrapped_at = new Date().toISOString();
+      });
+      return [];
+    }
+    if (/^UPDATE participants SET wishlist_notes = \? WHERE id = \?$/i.test(sql)) {
+      tables.participants.forEach((r) => { if (r.id === args[1]) r.wishlist_notes = args[0]; });
+      return [];
+    }
+    if (/^UPDATE participants SET wishlist_links = \? WHERE id = \?$/i.test(sql)) {
+      tables.participants.forEach((r) => { if (r.id === args[1]) r.wishlist_links = args[0]; });
+      return [];
+    }
+    if (/^UPDATE participants SET name = \? WHERE id = \? AND event_id = \?$/i.test(sql)) {
+      tables.participants.forEach((r) => {
+        if (r.id === args[1] && r.event_id === args[2]) r.name = args[0];
+      });
+      return [];
+    }
+    if (/^UPDATE qa_messages SET answer = \?/i.test(sql)) {
+      tables.qa_messages.forEach((r) => {
+        if (r.id === args[1] && r.event_id === args[2] && r.recipient_id === args[3]) {
+          r.answer = args[0];
+          r.answered_at = new Date().toISOString();
+        }
+      });
+      return [];
+    }
+
+    if (/^SELECT recipient_id, COUNT\(\*\) as cnt FROM qa_messages/i.test(sql)) {
+      const counts = new Map<string, number>();
+      for (const r of tables.qa_messages) {
+        if (r.event_id === args[0] && (r.answer === null || String(r.answer).trim() === '')) {
+          const rec = String(r.recipient_id);
+          counts.set(rec, (counts.get(rec) || 0) + 1);
+        }
+      }
+      return [...counts.entries()].map(([recipient_id, cnt]) => ({ recipient_id, cnt }));
+    }
+
+    const selectMatch = sql.match(/^SELECT (?:\*|allow_spoilers) FROM (\w+)(?: WHERE (.+?))?(?: ORDER BY .+)?$/i);
+    if (selectMatch) {
+      const [, table, whereClause] = selectMatch;
+      let rows = [...(tables[table] || [])];
+      if (whereClause) {
+        const conds = whereClause.split(/\s+AND\s+/i);
+        rows = rows.filter((row) =>
+          conds.every((cond, idx) => {
+            const col = cond.split('=')[0].trim();
+            return row[col] === args[idx];
+          })
+        );
+      }
+      return rows.map((r) => ({ ...r }));
+    }
+
+    return [];
+  }
+
+  function createStmt(sql: string, boundArgs: unknown[] = []): D1PreparedStatement {
+    return {
+      bind(...values: unknown[]) {
+        return createStmt(sql, values);
+      },
+      async first<T = Record<string, unknown>>(colName?: string): Promise<T | null> {
+        const rows = execQuery(sql, boundArgs);
+        const row = rows[0];
+        if (!row) return null;
+        if (colName) return (row[colName] as T) ?? null;
+        return row as T;
+      },
+      async all<T = Record<string, unknown>>(): Promise<D1Result<T>> {
+        const results = execQuery(sql, boundArgs) as T[];
+        return { results, success: true, meta: {} as D1Result<T>['meta'] };
+      },
+      async run<T = Record<string, unknown>>(): Promise<D1Result<T>> {
+        execQuery(sql, boundArgs);
+        return { results: [], success: true, meta: {} as D1Result<T>['meta'] };
+      },
+      async raw<T = unknown[]>(): Promise<T[]> {
+        return [];
+      },
+    } as unknown as D1PreparedStatement;
+  }
+
+  return {
+    prepare(query: string) {
+      return createStmt(query);
+    },
+    async batch<T = unknown>(statements: D1PreparedStatement[]): Promise<D1Result<T>[]> {
+      const out: D1Result<T>[] = [];
+      for (const s of statements) out.push(await s.run<T>());
+      return out;
+    },
+    async exec(): Promise<D1ExecResult> {
+      return { count: 1, duration: 0 };
+    },
+    async dump(): Promise<ArrayBuffer> {
+      return new ArrayBuffer(0);
+    },
+  } as unknown as D1Database;
+}
+
+export function createMemoryD1(forceFallback = false): D1Database {
+  const proc = (
     globalThis as unknown as {
-      process: {
-        getBuiltinModule(id: string): { DatabaseSync: new (path: string) => SqliteDatabase };
+      process?: {
+        getBuiltinModule?: (id: string) => { DatabaseSync?: new (path: string) => SqliteDatabase } | undefined;
       };
     }
-  ).process.getBuiltinModule('node:sqlite');
-  const sqlite = new DatabaseSync(':memory:');
+  ).process;
+  const sqliteMod = !forceFallback ? proc?.getBuiltinModule?.('node:sqlite') : undefined;
+  if (!sqliteMod?.DatabaseSync) {
+    return createPureMemoryD1();
+  }
+  const sqlite = new sqliteMod.DatabaseSync(':memory:');
 
   function createStmt(sql: string, boundArgs: unknown[] = []): D1PreparedStatement {
     return {
@@ -98,8 +351,10 @@ describe('Batch Name Parser & AES-256-GCM Assignment Crypto', () => {
 });
 
 describe('HTTP Routes: Self-Join, Bulk Paste, Encrypted No-Peek Draw & Anonymous Q&A', () => {
-  it('supports full lifecycle with encrypted assignments, self-join, bulk paste, and anonymous Q&A', async () => {
-    const DB = createMemoryD1();
+  it.each([false, true])(
+    'supports full lifecycle with encrypted assignments, self-join, bulk paste, and anonymous Q&A (fallback=%s)',
+    async (useFallback) => {
+      const DB = createMemoryD1(useFallback);
 
     // 1. Create exchange in Strict Encrypted No-Peek Mode
     const createRes = await app.request(
