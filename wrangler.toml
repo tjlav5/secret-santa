@@ -6,3 +6,7 @@ compatibility_date = "2024-11-01"
 binding = "DB"
 database_name = "secret-santa-db"
 database_id = "ddf3485a-e284-4998-af3e-efb2f4172c42"
+
+[[previews.d1_databases]]
+binding = "DB"
+database_id = "ddf3485a-e284-4998-af3e-efb2f4172c42"
