@@ -12,6 +12,8 @@ export interface DrawSuccess {
   ok: true;
   /** Map of giver participant ID -> receiver participant ID */
   assignments: Record<string, string>;
+  /** True when all participants form a single unbroken gift cycle */
+  singleCycle: boolean;
 }
 
 export interface DrawFailure {
@@ -22,12 +24,29 @@ export interface DrawFailure {
 export type DrawResult = DrawSuccess | DrawFailure;
 
 /**
- * Shuffles an array in place using Fisher-Yates and crypto random values when available.
+ * Returns an unbiased cryptographic random integer in [0, maxExclusive).
+ */
+function randomInt(maxExclusive: number): number {
+  if (maxExclusive <= 1) return 0;
+  const maxUint32 = 0xffffffff;
+  const limit = maxUint32 - ((maxUint32 + 1) % maxExclusive);
+  const buf = new Uint32Array(1);
+  while (true) {
+    crypto.getRandomValues(buf);
+    const val = buf[0];
+    if (val <= limit) {
+      return val % maxExclusive;
+    }
+  }
+}
+
+/**
+ * Shuffles a copy of an array using Fisher-Yates and unbiased cryptographic randomness.
  */
 function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = randomInt(i + 1);
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy;
@@ -41,8 +60,8 @@ function shuffle<T>(arr: T[]): T[] {
  * 2. Every participant receives a gift from exactly one participant.
  * 3. No participant draws themselves.
  * 4. No participant draws someone on their exclusion list.
- * 5. Prefers single Hamiltonian cycles when possible (so small 2-person sub-loops are avoided when N >= 3),
- *    falling back to general derangement if exclusions force disconnected cycles.
+ * 5. Guarantees a single Hamiltonian cycle across all participants whenever exclusion rules permit,
+ *    gracefully falling back to multi-cycle derangements only when exclusions mathematically force them.
  */
 export function computeSecretSantaDraw(
   participants: ParticipantNode[],
@@ -99,18 +118,26 @@ export function computeSecretSantaDraw(
     return degA - degB;
   });
 
-  // First attempt: Try finding a single full cycle (no reciprocal pairs A <-> B when n >= 3)
-  if (n >= 3) {
-    const cycleResult = solveBacktrack(giversOrdered, participants, forbiddenMap, true);
-    if (cycleResult) {
-      return { ok: true, assignments: cycleResult };
+  // First attempt: True single Hamiltonian cycle (one unbroken loop through all N participants)
+  if (n >= 2) {
+    const hamiltonian = solveHamiltonianCycle(giversOrdered, forbiddenMap);
+    if (hamiltonian) {
+      return { ok: true, assignments: hamiltonian, singleCycle: true };
     }
   }
 
-  // Second attempt: General valid derangement respecting all exclusions
+  // Second attempt: Derangement avoiding reciprocal 2-person loops (A <-> B) when n >= 3
+  if (n >= 3) {
+    const noPairsResult = solveBacktrack(giversOrdered, participants, forbiddenMap, true);
+    if (noPairsResult) {
+      return { ok: true, assignments: noPairsResult, singleCycle: false };
+    }
+  }
+
+  // Third attempt: General valid derangement respecting all exclusions
   const generalResult = solveBacktrack(giversOrdered, participants, forbiddenMap, false);
   if (generalResult) {
-    return { ok: true, assignments: generalResult };
+    return { ok: true, assignments: generalResult, singleCycle: false };
   }
 
   return {
@@ -118,6 +145,69 @@ export function computeSecretSantaDraw(
     error:
       'No valid gift assignment is possible with the current exclusion rules. Try removing one or more exclusions.',
   };
+}
+
+/**
+ * Searches for a single Hamiltonian cycle visiting every participant exactly once.
+ */
+function solveHamiltonianCycle(
+  orderedNodes: ParticipantNode[],
+  forbiddenMap: Map<string, Set<string>>
+): Record<string, string> | null {
+  const n = orderedNodes.length;
+  const startNode = orderedNodes[0];
+  const visited = new Set<string>([startNode.id]);
+  const path: ParticipantNode[] = [startNode];
+  let steps = 0;
+  const maxSteps = 40000;
+
+  function search(current: ParticipantNode): boolean {
+    if (++steps > maxSteps) return false;
+
+    if (path.length === n) {
+      // Closing edge back to startNode must be permitted
+      return !forbiddenMap.get(current.id)!.has(startNode.id);
+    }
+
+    const forbidden = forbiddenMap.get(current.id)!;
+    // Shuffle candidates for uniform variety, prioritizing constrained nodes lightly only on tie-free shuffles
+    const candidates = shuffle(orderedNodes).filter(
+      (cand) => !visited.has(cand.id) && !forbidden.has(cand.id)
+    );
+
+    // If only 1 step remains before closing, ensure at least one unvisited node can still reach startNode
+    const canClose = orderedNodes.some(
+      (node) => !visited.has(node.id) && !forbiddenMap.get(node.id)!.has(startNode.id)
+    );
+    if (!canClose) return false;
+
+    for (const next of candidates) {
+      visited.add(next.id);
+      path.push(next);
+
+      if (search(next)) {
+        return true;
+      }
+
+      path.pop();
+      visited.delete(next.id);
+      if (steps > maxSteps) return false;
+    }
+
+    return false;
+  }
+
+  if (!search(startNode)) {
+    return null;
+  }
+
+  const assignments: Record<string, string> = {};
+  for (let i = 0; i < n; i++) {
+    const giver = path[i];
+    const receiver = path[(i + 1) % n];
+    assignments[giver.id] = receiver.id;
+  }
+  return assignments;
 }
 
 function solveBacktrack(
@@ -129,8 +219,11 @@ function solveBacktrack(
   const n = giversOrdered.length;
   const assignments: Record<string, string> = {};
   const usedReceivers = new Set<string>();
+  let steps = 0;
+  const maxSteps = 40000;
 
   function backtrack(index: number): boolean {
+    if (++steps > maxSteps) return false;
     if (index === n) {
       return true;
     }
@@ -138,11 +231,9 @@ function solveBacktrack(
     const giver = giversOrdered[index];
     const forbidden = forbiddenMap.get(giver.id)!;
 
-    // Candidate receivers in randomized order
     const candidates = shuffle(allParticipants).filter((r) => {
       if (usedReceivers.has(r.id)) return false;
       if (forbidden.has(r.id)) return false;
-      // If avoiding reciprocal 2-cycles (A->B and B->A) when n >= 3
       if (avoidReciprocalPairs && assignments[r.id] === giver.id) {
         return false;
       }
@@ -159,6 +250,7 @@ function solveBacktrack(
 
       delete assignments[giver.id];
       usedReceivers.delete(candidate.id);
+      if (steps > maxSteps) return false;
     }
 
     return false;
@@ -169,29 +261,26 @@ function solveBacktrack(
 }
 
 /**
- * Generates a URL-safe cryptographic random token.
+ * Generates an unbiased URL-safe cryptographic random token.
  */
 export function generateToken(length = 16): string {
   const alphabet = '23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
   let out = '';
   for (let i = 0; i < length; i++) {
-    out += alphabet[bytes[i] % alphabet.length];
+    out += alphabet[randomInt(alphabet.length)];
   }
   return out;
 }
 
 /**
- * Generates a readable short ID for events (e.g. "ev_8k2m9p4x").
+ * Generates an unbiased readable short ID for entities (e.g. "ev_8k2m9p4x").
  */
 export function generateId(prefix: string, length = 10): string {
   const alphabet = '23456789abcdefghjkmnpqrstuvwxyz';
-  const bytes = new Uint8Array(length);
-  crypto.getRandomValues(bytes);
   let out = `${prefix}_`;
   for (let i = 0; i < length; i++) {
-    out += alphabet[bytes[i] % alphabet.length];
+    out += alphabet[randomInt(alphabet.length)];
   }
   return out;
 }
+
