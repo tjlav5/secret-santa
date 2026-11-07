@@ -170,37 +170,87 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
           </div>
 
           {recentEvents.length > 0 && (
-            <div class="surface-card-compact" style="margin-top: 1.5rem;">
+            <div class="surface-card-compact" style="margin-top: 1.5rem;" id="recent-events-card">
               <div
                 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;"
               >
-                <h2 style="font-size: 1.12rem;">Your Exchanges on This Device</h2>
-                <span class="badge badge-pending">{recentEvents.length} Saved</span>
+                <div>
+                  <h2 style="font-size: 1.12rem;">Your Exchanges on This Device</h2>
+                  <span style="font-size: 0.74rem; color: var(--ink-500);">
+                    Private keys saved locally so you don’t lose access
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.45rem;">
+                  <span class="badge badge-pending">{recentEvents.length} Saved</span>
+                  <form method="post" action="/recent-events/clear" style="margin: 0;">
+                    <button
+                      type="submit"
+                      class="btn btn-ghost btn-sm"
+                      style="font-size: 0.72rem; padding: 0.2rem 0.5rem; color: var(--ink-500); text-decoration: underline;"
+                      title="Clear saved exchange history from this browser"
+                    >
+                      Clear All
+                    </button>
+                  </form>
+                </div>
               </div>
               <ul class="participant-list">
-                {recentEvents.map((ev) => (
-                  <li class="participant-item" key={ev.id} style="padding: 0.7rem 0.95rem;">
-                    <div>
-                      <strong
-                        style="font-weight: 700; font-family: var(--font-display); font-size: 1.02rem;"
-                      >
-                        {ev.title}
-                      </strong>
-                      <span
-                        style="display: block; font-size: 0.72rem; color: var(--ink-500); font-family: var(--font-mono);"
-                      >
-                        DISPATCH ID: {ev.id}
-                      </span>
-                    </div>
-                    <a
-                      href={`/events/${ev.id}?key=${encodeURIComponent(ev.key)}`}
-                      class="btn btn-secondary btn-sm"
-                      id={`open-recent-${ev.id}`}
+                {recentEvents.map((ev) => {
+                  const isDemo = ev.title === 'Winter Chalet Gift Exchange 2026';
+                  return (
+                    <li
+                      class="participant-item"
+                      key={ev.id}
+                      style="padding: 0.7rem 0.95rem; align-items: center;"
                     >
-                      Open Dispatch →
-                    </a>
-                  </li>
-                ))}
+                      <div style="min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                          <strong
+                            style="font-weight: 700; font-family: var(--font-display); font-size: 1.02rem;"
+                          >
+                            {ev.title}
+                          </strong>
+                          {isDemo && (
+                            <span
+                              class="badge"
+                              style="background: hsla(40, 72%, 55%, 0.16); color: var(--gold-700); border: 1px solid var(--border-brass); font-size: 0.64rem; padding: 0.1rem 0.45rem;"
+                            >
+                              Demo Sandbox
+                            </span>
+                          )}
+                        </div>
+                        <span
+                          style="display: block; font-size: 0.72rem; color: var(--ink-500); font-family: var(--font-mono); margin-top: 0.15rem;"
+                        >
+                          DISPATCH ID: {ev.id}
+                        </span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
+                        <a
+                          href={`/events/${ev.id}?key=${encodeURIComponent(ev.key)}`}
+                          class="btn btn-secondary btn-sm"
+                          id={`open-recent-${ev.id}`}
+                        >
+                          Open Dispatch →
+                        </a>
+                        <form
+                          method="post"
+                          action={`/recent-events/${ev.id}/delete`}
+                          style="margin: 0;"
+                        >
+                          <button
+                            type="submit"
+                            class="btn btn-ghost btn-sm"
+                            style="padding: 0.35rem 0.55rem; font-size: 0.78rem; color: var(--ink-400);"
+                            title="Remove from device list"
+                          >
+                            ✕
+                          </button>
+                        </form>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

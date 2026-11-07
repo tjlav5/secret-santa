@@ -72,8 +72,24 @@ function getRecentEvents(c: Context): RecentEventCookieItem[] {
 }
 
 function saveRecentEvent(c: Context, item: RecentEventCookieItem): void {
-  const existing = getRecentEvents(c).filter((e) => e.id !== item.id);
+  const isDemo = item.title === 'Winter Chalet Gift Exchange 2026';
+  const existing = getRecentEvents(c).filter((e) => {
+    if (e.id === item.id) return false;
+    // Replace previous demo sandboxes so testing the demo does not stack duplicate rows
+    if (isDemo && e.title === 'Winter Chalet Gift Exchange 2026') return false;
+    return true;
+  });
   const updated = [item, ...existing].slice(0, 6);
+  setCookie(c, RECENT_EVENTS_COOKIE, JSON.stringify(updated), {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'Lax',
+    maxAge: 60 * 60 * 24 * 90,
+  });
+}
+
+function removeRecentEvent(c: Context, eventId: string): void {
+  const updated = getRecentEvents(c).filter((e) => e.id !== eventId);
   setCookie(c, RECENT_EVENTS_COOKIE, JSON.stringify(updated), {
     path: '/',
     httpOnly: true,
@@ -129,6 +145,24 @@ async function loadEventBundle(db: D1Database, eventId: string) {
 app.get('/', (c) => {
   const recentEvents = getRecentEvents(c);
   return c.html(<HomePage recentEvents={recentEvents} />);
+});
+
+// 1b. REMOVE SAVED EVENT FROM DEVICE HISTORY
+app.post('/recent-events/:id/delete', (c) => {
+  const eventId = c.req.param('id');
+  removeRecentEvent(c, eventId);
+  return c.redirect('/');
+});
+
+// 1c. CLEAR ALL SAVED EVENTS FROM DEVICE HISTORY
+app.post('/recent-events/clear', (c) => {
+  setCookie(c, RECENT_EVENTS_COOKIE, '[]', {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'Lax',
+    maxAge: 0,
+  });
+  return c.redirect('/');
 });
 
 // 2. CREATE NEW EVENT
