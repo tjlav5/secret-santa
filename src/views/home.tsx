@@ -27,43 +27,38 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
             />
             <div class="hero-vignette-overlay">
               <div class="hero-vignette-badge">
-                <span>✦</span>
-                <span>Arctica Dispatch // Lat 90°N</span>
+                <span aria-hidden="true">✦</span>
+                <span>North Pole Dispatch</span>
               </div>
-              <span
-                style="font-family: var(--font-display); font-size: 0.88rem; font-style: italic; color: var(--gold-200); text-shadow: 0 2px 4px rgba(0,0,0,0.8);"
-              >
-                Zero-Knowledge Derangement Protocol
+              <span class="hero-vignette-caption">
+                AES-GCM Encrypted Draws • Anonymous Q&amp;A
               </span>
             </div>
           </div>
 
           <div class="eyebrow">
-            <span>✦ Holiday Gift Dispatch</span>
-            <span>•</span>
-            <span>Zero Accounts Needed</span>
+            <span>Holiday Gift Exchange</span>
+            <span aria-hidden="true">•</span>
+            <span>No Sign-Ups Required</span>
           </div>
 
           <h1 class="hero-title">
             Host your Secret Santa exchange in <em>under a minute.</em>
           </h1>
 
-          <p class="hero-subtitle" style="margin-bottom: 2rem;">
-            Gather your circle, set partner or household exclusion rules, and draw names. Every
-            participant receives a private wax-sealed link they can open via iMessage, WhatsApp, or
-            email—keeping every match a complete surprise, even from the organizer.
+          <p class="hero-subtitle">
+            Share one group invite link—or paste your guest list—set household exclusions, and draw
+            names into a single unbroken gift loop. Assignments are encrypted per envelope so even
+            the host stays surprised.
           </p>
 
-          {/* SLEEK DEMO BANNER */}
-          <div class="demo-ticket-card" style="margin-bottom: 2.25rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <div
-                style="width: 44px; height: 44px; border-radius: 10px; background: rgba(216, 181, 111, 0.15); border: 1px solid rgba(216, 181, 111, 0.35); color: var(--gold-400); display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
-                aria-hidden="true"
-              >
+          {/* SANDBOX DEMO TICKET */}
+          <div class="demo-ticket-card">
+            <div class="demo-ticket-lead">
+              <div class="demo-ticket-icon" aria-hidden="true">
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -79,76 +74,63 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
                 </svg>
               </div>
               <div>
-                <div
-                  style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: #FAF8F5;"
-                >
-                  Test the draw &amp; break a wax seal first
-                </div>
-                <div style="font-size: 0.82rem; color: rgba(250, 248, 245, 0.75);">
-                  Launches an instant pre-populated sandbox with 4 guests and exclusions.
+                <div class="demo-ticket-title">Test the draw &amp; break a wax seal first</div>
+                <div class="demo-ticket-sub">
+                  Opens an instant sandbox exchange with 4 guests, wishlists, and couple rules.
                 </div>
               </div>
             </div>
 
-            <form action="/demo" method="post" style="margin: 0;">
-              <button
-                type="submit"
-                class="btn btn-secondary btn-sm"
-                id="seed-demo-event-btn"
-              >
-                Launch Sandbox Demo →
+            <form action="/demo" method="post">
+              <button type="submit" class="btn btn-secondary btn-sm" id="seed-demo-event-btn">
+                Try Sandbox Demo →
               </button>
             </form>
           </div>
 
-          {/* 3 STEP EDITORIAL CARDS */}
-          <div class="feature-steps" style="margin-top: 0;">
-            <div class="surface-card-compact">
+          {/* 3-STEP OVERVIEW */}
+          <div class="feature-steps">
+            <div class="surface-card-compact is-interactive">
               <div class="step-number">01</div>
-              <h3 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Add Names &amp; Rules</h3>
-              <p style="font-size: 0.84rem; color: var(--ink-700); line-height: 1.5;">
-                Enter your participants and set exclusion rules so spouses or roommates never draw each
-                other.
+              <h3>Share Group Join Link</h3>
+              <p class="text-muted" style="font-size: 0.84rem; margin-top: 0.25rem;">
+                Drop one self-join link into your group chat—or bulk-paste names—and set partner
+                exclusions.
               </p>
             </div>
 
-            <div class="surface-card-compact">
+            <div class="surface-card-compact is-interactive">
               <div class="step-number">02</div>
-              <h3 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Dispatch Links</h3>
-              <p style="font-size: 0.84rem; color: var(--ink-700); line-height: 1.5;">
-                Copy private envelope URLs or share via WhatsApp and iMessage in one tap. No accounts
-                needed.
+              <h3>Encrypted No-Peek Draw</h3>
+              <p class="text-muted" style="font-size: 0.84rem; margin-top: 0.25rem;">
+                Matches lock into a single loop encrypted with each guest’s private link—no spoilers
+                for the host.
               </p>
             </div>
 
-            <div class="surface-card-compact">
+            <div class="surface-card-compact is-interactive">
               <div class="step-number">03</div>
-              <h3 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Break the Seal</h3>
-              <p style="font-size: 0.84rem; color: var(--ink-700); line-height: 1.5;">
-                Guests open their assignment in private and post live wishlist notes for their Santa.
+              <h3>Wishlists &amp; Secret Q&amp;A</h3>
+              <p class="text-muted" style="font-size: 0.84rem; margin-top: 0.25rem;">
+                Guests unwrap their match, post gift links, and ask their recipient anonymous
+                questions.
               </p>
             </div>
           </div>
 
           {recentEvents.length > 0 && (
-            <div class="surface-card-compact" style="margin-top: 2rem;" id="recent-events-card">
-              <div
-                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;"
-              >
+            <div class="surface-card-compact" style="margin-top: 1.85rem;" id="recent-events-card">
+              <div class="card-header-row" style="margin-bottom: 0.8rem; align-items: center;">
                 <div>
-                  <h2 style="font-size: 1.08rem;">Your Exchanges on This Device</h2>
-                  <span style="font-size: 0.74rem; color: var(--ink-500);">
-                    Private keys saved locally so you don’t lose access
+                  <h2 style="font-size: 1.08rem;">Saved Exchanges on This Device</h2>
+                  <span class="text-subtle" style="font-size: 0.76rem;">
+                    Organizer keys stored locally in this browser
                   </span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="share-actions">
                   <span class="badge badge-pending">{recentEvents.length} Saved</span>
-                  <form method="post" action="/recent-events/clear" style="margin: 0;">
-                    <button
-                      type="submit"
-                      class="btn btn-ghost btn-sm"
-                      style="font-size: 0.74rem; padding: 0.2rem 0.5rem; color: var(--ink-500); text-decoration: underline;"
-                    >
+                  <form method="post" action="/recent-events/clear">
+                    <button type="submit" class="btn btn-ghost btn-xs">
                       Clear All
                     </button>
                   </form>
@@ -158,47 +140,27 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
                 {recentEvents.map((ev) => {
                   const isDemo = ev.title === 'Winter Chalet Gift Exchange 2026';
                   return (
-                    <li
-                      class="participant-item"
-                      key={ev.id}
-                      style="padding: 0.75rem 0.95rem; align-items: center;"
-                    >
-                      <div style="min-width: 0;">
-                        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
-                          <strong
-                            style="font-weight: 700; font-family: var(--font-display); font-size: 1rem;"
-                          >
-                            {ev.title}
-                          </strong>
-                          {isDemo && (
-                            <span class="badge badge-gold" style="font-size: 0.64rem;">
-                              Sandbox Demo
-                            </span>
-                          )}
+                    <li class="participant-item" key={ev.id}>
+                      <div class="participant-meta">
+                        <div class="participant-title-row">
+                          <span class="participant-name">{ev.title}</span>
+                          {isDemo && <span class="badge badge-gold">Sandbox</span>}
                         </div>
-                        <span
-                          style="display: block; font-size: 0.72rem; color: var(--ink-500); font-family: var(--font-mono); margin-top: 0.15rem;"
-                        >
-                          ID: {ev.id}
-                        </span>
+                        <span class="participant-url-preview">ID: {ev.id}</span>
                       </div>
-                      <div style="display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
+                      <div class="share-actions">
                         <a
                           href={`/events/${ev.id}?key=${encodeURIComponent(ev.key)}`}
                           class="btn btn-secondary btn-sm"
                           id={`open-recent-${ev.id}`}
                         >
-                          Open Dispatch →
+                          Open →
                         </a>
-                        <form
-                          method="post"
-                          action={`/recent-events/${ev.id}/delete`}
-                          style="margin: 0;"
-                        >
+                        <form method="post" action={`/recent-events/${ev.id}/delete`}>
                           <button
                             type="submit"
                             class="btn btn-ghost btn-sm"
-                            style="padding: 0.35rem 0.55rem; font-size: 0.78rem; color: var(--ink-400);"
+                            aria-label={`Remove ${ev.title} from saved list`}
                             title="Remove from device list"
                           >
                             ✕
@@ -215,14 +177,20 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
 
         {/* RIGHT COLUMN: COMMISSION FORM CARD */}
         <div class="surface-card" id="create-event-card">
-          <div style="margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.65rem; margin-bottom: 0.35rem;">Commission an Exchange</h2>
-            <p style="font-size: 0.88rem; color: var(--ink-700);">
-              Fill in the details below to generate your private Organizer Link.
+          <div style="margin-bottom: 1.4rem;">
+            <div class="section-kicker">Host Setup</div>
+            <h2 style="font-size: 1.6rem; margin-bottom: 0.3rem;">Create an Exchange</h2>
+            <p class="text-muted" style="font-size: 0.88rem;">
+              Set up your event details below to generate your Organizer Dashboard and Group Invite
+              Link.
             </p>
           </div>
 
-          {error && <div class="alert alert-error">{error}</div>}
+          {error && (
+            <div class="alert alert-error" role="alert">
+              {error}
+            </div>
+          )}
 
           <form action="/events" method="post" id="create-event-form">
             <div class="form-group">
@@ -251,18 +219,16 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
                 placeholder="e.g., TJ"
                 required
               />
-              <label
-                style="display: flex; align-items: center; gap: 0.55rem; margin-top: 0.55rem; font-size: 0.84rem; color: var(--ink-700); cursor: pointer;"
-              >
+              <label class="checkbox-row" for="include-organizer-checkbox">
                 <input
                   type="checkbox"
                   name="include_organizer"
                   value="1"
                   checked
                   id="include-organizer-checkbox"
-                  style="accent-color: var(--forest-900); width: 15px; height: 15px;"
+                  class="checkbox-input"
                 />
-                Include me as a participant in the gift draw
+                <span>Include me as a participant in the gift draw</span>
               </label>
             </div>
 
@@ -278,7 +244,7 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
                   class="input-field"
                   placeholder="e.g., $50"
                 />
-                <div class="preset-chips">
+                <div class="preset-chips" role="group" aria-label="Spending limit presets">
                   {['$25', '$50', '$100', 'Handmade'].map((preset) => (
                     <button
                       type="button"
@@ -313,16 +279,39 @@ export const HomePage: FC<HomePageProps> = ({ recentEvents = [], error }) => {
                 id="event-notes-input"
                 name="notes"
                 class="textarea-field"
-                style="min-height: 82px;"
+                style="min-height: 78px;"
                 placeholder="e.g., Bring your wrapped gift to Grandma's house on Christmas Eve! Homemade gifts welcome."
               ></textarea>
             </div>
 
+            <div class="privacy-option-card">
+              <input type="hidden" name="has_privacy_field" value="1" />
+              <label class="checkbox-row" style="margin-top: 0; align-items: flex-start;" for="strict-privacy-checkbox">
+                <input
+                  type="checkbox"
+                  name="strict_privacy"
+                  value="1"
+                  checked
+                  id="strict-privacy-checkbox"
+                  class="checkbox-input"
+                  style="margin-top: 0.2rem;"
+                />
+                <span>
+                  <strong style="color: var(--ink-900); display: block; font-size: 0.86rem;">
+                    🔒 Strict Encrypted No-Peek Mode (Recommended)
+                  </strong>
+                  <span class="text-subtle" style="font-size: 0.78rem; display: block; margin-top: 0.1rem;">
+                    Encrypts matches with AES-256-GCM per envelope and disables the organizer
+                    spoiler list so you can play too.
+                  </span>
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
-              class="btn btn-primary btn-full"
+              class="btn btn-primary btn-lg btn-full"
               id="create-event-submit-btn"
-              style="margin-top: 0.6rem; height: 46px;"
             >
               ✦ Create Secret Santa Exchange →
             </button>

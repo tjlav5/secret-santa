@@ -26,10 +26,10 @@ export const Layout: FC<LayoutProps> = ({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        <link rel="stylesheet" href="/styles.css?v=2026.5" />
+        <link rel="stylesheet" href="/styles.css?v=2026.7" />
       </head>
       <body>
         <header class="site-header">
@@ -55,13 +55,9 @@ export const Layout: FC<LayoutProps> = ({
               </span>
             </a>
 
-            <nav class="header-nav">
+            <nav class="header-nav" aria-label="Primary">
               {headerRight ?? (
-                <a
-                  href="/#create-event-card"
-                  class="nav-link"
-                  id="nav-new-event-btn"
-                >
+                <a href="/#create-event-card" class="nav-link" id="nav-new-event-btn">
                   + New Exchange
                 </a>
               )}
@@ -71,22 +67,19 @@ export const Layout: FC<LayoutProps> = ({
 
         <main class="main-container">{children}</main>
 
-        <footer
-          style="text-align: center; padding: 3rem 1.5rem 4rem; color: var(--ink-500); font-size: 0.82rem; border-top: 1px solid var(--border-hairline);"
-        >
-          <p
-            style="font-family: var(--font-display); font-style: italic; font-size: 0.96rem; color: var(--ink-700); margin-bottom: 0.35rem;"
-          >
-            “Sealed with secrecy, delivered with cheer.”
-          </p>
-          <p>
-            North Pole Post • Powered by Cloudflare Workers &amp; D1 • Zero Passwords Required
-          </p>
+        <footer class="site-footer">
+          <p class="footer-quote">“Sealed with secrecy, delivered with cheer.”</p>
+          <p>North Pole Post • Powered by Cloudflare Workers &amp; D1 • Zero Passwords Required</p>
         </footer>
 
         <script>
           {raw(`
+            function prefersReducedMotion() {
+              return Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            }
+
             function burstGoldSparks(x, y) {
+              if (prefersReducedMotion()) return;
               try {
                 var canvas = document.createElement('canvas');
                 canvas.style.position = 'fixed';
@@ -98,16 +91,16 @@ export const Layout: FC<LayoutProps> = ({
                 document.body.appendChild(canvas);
                 var ctx = canvas.getContext('2d');
                 var particles = [];
-                var colors = ['#F3DC9B', '#D4A853', '#E6C37A', '#FFFFFF', '#FFA5AC'];
-                for (var i = 0; i < 45; i++) {
+                var colors = ['#F4DF9E', '#D6AB56', '#E8C77E', '#FFFFFF', '#AEF0C3'];
+                for (var i = 0; i < 42; i++) {
                   var angle = Math.random() * Math.PI * 2;
-                  var speed = Math.random() * 9 + 3;
+                  var speed = Math.random() * 8.5 + 3;
                   particles.push({
                     x: x || window.innerWidth / 2,
                     y: y || window.innerHeight / 2,
                     vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed - 2.5,
-                    size: Math.random() * 3.5 + 1.5,
+                    vy: Math.sin(angle) * speed - 2.4,
+                    size: Math.random() * 3.2 + 1.5,
                     color: colors[Math.floor(Math.random() * colors.length)],
                     alpha: 1,
                     decay: Math.random() * 0.025 + 0.015
@@ -133,7 +126,7 @@ export const Layout: FC<LayoutProps> = ({
                       ctx.restore();
                     }
                   });
-                  if (alive && performance.now() - start < 1800) {
+                  if (alive && performance.now() - start < 1700) {
                     requestAnimationFrame(loop);
                   } else {
                     canvas.remove();
@@ -166,22 +159,34 @@ export const Layout: FC<LayoutProps> = ({
             }
 
             function copyToClipboard(text, btnEl, copiedLabel) {
-              navigator.clipboard.writeText(text).then(function() {
-                var original = btnEl.innerHTML;
+              var markCopied = function() {
+                if (!btnEl) return;
+                var original = btnEl.getAttribute('data-orig-label') || btnEl.innerHTML;
+                btnEl.setAttribute('data-orig-label', original);
                 btnEl.innerHTML = copiedLabel || '✓ Copied!';
-                btnEl.style.background = 'linear-gradient(135deg, #1C4D34 0%, #0E2217 100%)';
-                btnEl.style.color = '#FFFFFF';
-                btnEl.style.borderColor = '#D4A853';
+                btnEl.style.borderColor = '#D6AB56';
                 setTimeout(function() {
                   btnEl.innerHTML = original;
-                  btnEl.style.background = '';
-                  btnEl.style.color = '';
                   btnEl.style.borderColor = '';
-                }, 1800);
-              });
+                }, 1700);
+              };
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(markCopied).catch(function() {});
+              } else {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); markCopied(); } catch(e) {}
+                ta.remove();
+              }
             }
 
             function initTiltEffects() {
+              if (prefersReducedMotion()) return;
+              if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
               document.querySelectorAll('[data-tilt]').forEach(function(el) {
                 if (el._hasTilt) return;
                 el._hasTilt = true;
@@ -189,15 +194,33 @@ export const Layout: FC<LayoutProps> = ({
                   var rect = el.getBoundingClientRect();
                   var x = e.clientX - rect.left - rect.width / 2;
                   var y = e.clientY - rect.top - rect.height / 2;
-                  var rx = (y / (rect.height / 2)) * -5;
-                  var ry = (x / (rect.width / 2)) * 5;
-                  el.style.transform = 'perspective(1000px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) scale3d(1.01, 1.01, 1.01)';
+                  var rx = (y / (rect.height / 2)) * -3.5;
+                  var ry = (x / (rect.width / 2)) * 3.5;
+                  el.style.transform = 'perspective(1000px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
                 });
                 el.addEventListener('mouseleave', function() {
                   el.style.transform = '';
                 });
               });
             }
+
+            // Close open <details class="action-menu"> when clicking outside or pressing Escape
+            document.addEventListener('click', function(e) {
+              var openMenus = document.querySelectorAll('details.action-menu[open]');
+              openMenus.forEach(function(menu) {
+                if (!menu.contains(e.target)) {
+                  menu.removeAttribute('open');
+                }
+              });
+            });
+            document.addEventListener('keydown', function(e) {
+              if (e.key === 'Escape') {
+                document.querySelectorAll('details.action-menu[open]').forEach(function(menu) {
+                  menu.removeAttribute('open');
+                });
+              }
+            });
+
             if (document.readyState === 'loading') {
               document.addEventListener('DOMContentLoaded', initTiltEffects);
             } else {
@@ -237,8 +260,8 @@ export const Layout: FC<LayoutProps> = ({
                   body: new FormData(form),
                   headers: { 'X-Inline-Target': targetSel }
                 });
-                if (isUnwrap) {
-                  await new Promise(function(r) { setTimeout(r, 280); });
+                if (isUnwrap && !prefersReducedMotion()) {
+                  await new Promise(function(r) { setTimeout(r, 260); });
                 }
                 var res = await fetchPromise;
                 var html = await res.text();
@@ -257,7 +280,7 @@ export const Layout: FC<LayoutProps> = ({
                     window.location.reload();
                   }
                 };
-                if (document.startViewTransition) {
+                if (document.startViewTransition && !prefersReducedMotion()) {
                   document.startViewTransition(applySwap);
                 } else {
                   applySwap();

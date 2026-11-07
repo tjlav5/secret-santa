@@ -4,15 +4,18 @@ A fast, passwordless Secret Santa gift exchange organizer built for **Cloudflare
 
 ## Features
 
-- **Zero Passwords / Zero Friction:**
-  - Organizers create an exchange and receive a private **Organizer Dashboard URL** (`/events/:id?key=...`) automatically saved to their browser cookies.
-  - Each participant gets a unique, unguessable **Private Envelope Link** (`/reveal/:token`) that can be shared in one click via Copy Link, WhatsApp, or SMS/iMessage.
-- **Constrained Matching Solver (`src/algorithm.ts`):**
-  - Guarantees no self-draws, respects mutual or one-way exclusion rules (e.g. couples/partners/roommates), and avoids reciprocal 2-person sub-loops when $N \ge 3$.
-- **Interactive Seal Break & Live Wishlists:**
-  - Participants break the seal on their digital envelope to reveal their match, view their recipient's gift hints/links, and save their own wishlist notes and item URLs.
-- **Progressive Native Forms (~600B Inline JS):**
-  - Every action is a standard `<form method="post">` that works with 0 JS, progressively enhanced with a ~600-byte inline `fetch()` + `document.startViewTransition()` swapper for instant, no-reload updates.
+- **Zero Passwords / Crowdsourced Roster:**
+  - Organizers create an exchange and receive a private **Organizer Dashboard URL** (`/events/:id?key=...`) saved locally to their device cookies, plus a shareable **Group Self-Join Link** (`/join/:code`) so guests can add themselves and their wishlists directly from a group chat (or hosts can bulk-paste a list of names at once).
+  - Each participant gets a private **Envelope Link** (`/reveal/:token`) shareable in one tap via Copy Link, WhatsApp, or SMS/iMessage.
+- **Single-Cycle Matching Solver (`src/algorithm.ts`):**
+  - Guarantees no self-draws, respects mutual or one-way exclusion rules (couples, partners, roommates), and solves for a single unbroken Hamiltonian gift cycle across all $N$ participants using unbiased CSPRNG shuffling (falling back to multi-cycle derangements only when exclusions mathematically force them).
+- **AES-256-GCM Encrypted No-Peek Mode (`src/crypto.ts`):**
+  - Assignments are encrypted at rest with WebCrypto AES-256-GCM using a key derived from each participant's private token. In **Strict Encrypted No-Peek Mode** (default), not even the host can view a master spoiler list after drawing.
+- **Tactile Envelope Reveal, Live Wishlists & Anonymous Q&A:**
+  - Participants break the wax seal on their stationery envelope to reveal their match, browse live-synced gift notes and validated `http(s)` item links, and exchange **anonymous questions & replies** with their match (storing zero `santa_id` in the database).
+- **Progressive Native Forms + View Transitions:**
+  - Every mutation is a standard `<form method="post">` that works without JavaScript and upgrades via `fetch()` + `document.startViewTransition()` partial swaps.
+
 
 ## Local Development
 
