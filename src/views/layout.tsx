@@ -136,35 +136,12 @@ export const Layout: FC<LayoutProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title} — North Pole Post</title>
         <meta name="description" content={description} />
-        <style>{raw(APP_CSS)}</style>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="/styles.css?v=2026.3" />
       </head>
       <body>
         <div class="airmail-trim" aria-hidden="true"></div>
-
-        {/* Ambient Alpine Snowfall Layer (toggled via navbar button) */}
-        <div class="snow-canvas" aria-hidden="true">
-          <span class="snowflake" style="left: 7%; animation-duration: 11s; animation-delay: 0s;">
-            ❄
-          </span>
-          <span class="snowflake" style="left: 19%; animation-duration: 14s; animation-delay: 2s;">
-            ✦
-          </span>
-          <span class="snowflake" style="left: 34%; animation-duration: 10s; animation-delay: 4s;">
-            ❅
-          </span>
-          <span class="snowflake" style="left: 51%; animation-duration: 13s; animation-delay: 1s;">
-            ✦
-          </span>
-          <span class="snowflake" style="left: 68%; animation-duration: 12s; animation-delay: 3s;">
-            ❄
-          </span>
-          <span class="snowflake" style="left: 83%; animation-duration: 15s; animation-delay: 2.5s;">
-            ❅
-          </span>
-          <span class="snowflake" style="left: 93%; animation-duration: 11.5s; animation-delay: 0.7s;">
-            ✦
-          </span>
-        </div>
 
         <header class="site-header">
           <div class="header-inner">
@@ -189,27 +166,17 @@ export const Layout: FC<LayoutProps> = ({
               </span>
             </a>
 
-            <div style="display: flex; align-items: center; gap: 0.55rem;">
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm"
-                id="snow-toggle-btn"
-                onclick="toggleSnowfall()"
-                title="Toggle gentle alpine snowfall"
-                style="font-size: 0.76rem; border: 1px solid var(--border-hairline);"
-              >
-                ❄️ Atmosphere
-              </button>
-              {headerRight || (
+            <nav class="header-nav">
+              {headerRight ?? (
                 <a
                   href="/#create-event-card"
-                  class="btn btn-secondary btn-sm"
+                  class="nav-link"
                   id="nav-new-event-btn"
                 >
                   + New Exchange
                 </a>
               )}
-            </div>
+            </nav>
           </div>
         </header>
 
@@ -231,21 +198,6 @@ export const Layout: FC<LayoutProps> = ({
 
         <script>
           {raw(`
-            (function() {
-              try {
-                if (localStorage.getItem('npp_snow') === '1') {
-                  document.body.classList.add('snow-enabled');
-                }
-              } catch (e) {}
-            })();
-
-            function toggleSnowfall() {
-              var enabled = document.body.classList.toggle('snow-enabled');
-              try {
-                localStorage.setItem('npp_snow', enabled ? '1' : '0');
-              } catch (e) {}
-            }
-
             function playUnwrapChime() {
               try {
                 var Ctx = window.AudioContext || window.webkitAudioContext;

@@ -493,12 +493,9 @@ export const DashboardPage: FC<DashboardProps> = (props) => {
     <Layout
       title={`${event.title} — Organizer Dispatch`}
       headerRight={
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span class="badge badge-pending">Organizer Dispatch</span>
-          <a href="/" class="btn btn-secondary btn-sm">
-            + New Exchange
-          </a>
-        </div>
+        <a href="/#create-event-card" class="nav-link">
+          + New Exchange
+        </a>
       }
     >
       <div class="pine-banner" style="margin-bottom: 2.15rem;">

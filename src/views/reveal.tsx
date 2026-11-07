@@ -324,7 +324,9 @@ export const RevealPage: FC<RevealPageProps> = ({
     <Layout
       title={`${participant.name}'s Secret Santa Envelope — ${event.title}`}
       headerRight={
-        <span class="badge badge-pending">Private Dispatch • {participant.name}</span>
+        <a href="/" class="nav-link">
+          + Host an Exchange
+        </a>
       }
     >
       <div class="narrow-container">

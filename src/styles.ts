@@ -222,6 +222,37 @@ a {
   margin-top: 0.12rem;
 }
 
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--forest-900);
+  padding: 0.42rem 0.88rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-paper);
+  box-shadow: 0 1px 2px rgba(12, 28, 21, 0.04);
+  transition: all 0.16s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background: #FFFFFF;
+  border-color: var(--border-strong);
+  color: var(--crimson-600);
+  box-shadow: 0 2px 6px rgba(12, 28, 21, 0.08);
+}
+
 /* Layout Containers */
 .main-container {
   max-width: 1140px;
@@ -1108,3 +1139,18 @@ body.snow-enabled .snow-canvas {
   }
 }
 `;
+
+export const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="crest-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#184e36"/>
+      <stop offset="100%" stop-color="#081810"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#crest-grad)"/>
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="none" stroke="#D4A853" stroke-width="1.2" stroke-opacity="0.75"/>
+  <g transform="translate(4, 4)" stroke="#F5CF75" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M12 2v20M17 5l-5 5-5-5M17 19l-5-5-5 5M2 12h20M5 7l5 5-5 5M19 7l-5 5 5 5" />
+  </g>
+</svg>`;
+

@@ -16,12 +16,32 @@ import {
   UnwrappedMatchCard,
 } from './views/reveal';
 import { Layout } from './views/layout';
+import { APP_CSS, FAVICON_SVG } from './styles';
 
 export interface Bindings {
   DB: D1Database;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// 0. STATIC ASSETS: FAVICON & CACHED STYLESHEET
+app.get('/styles.css', (c) => {
+  c.header('Content-Type', 'text/css; charset=UTF-8');
+  c.header('Cache-Control', 'public, max-age=31536000, immutable');
+  return c.body(APP_CSS);
+});
+
+app.get('/favicon.svg', (c) => {
+  c.header('Content-Type', 'image/svg+xml');
+  c.header('Cache-Control', 'public, max-age=604800, immutable');
+  return c.body(FAVICON_SVG);
+});
+
+app.get('/favicon.ico', (c) => {
+  c.header('Content-Type', 'image/svg+xml');
+  c.header('Cache-Control', 'public, max-age=604800, immutable');
+  return c.body(FAVICON_SVG);
+});
 
 // Automatically ensure D1 schema tables exist on first request
 app.use('*', async (c, next) => {
