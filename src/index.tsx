@@ -17,6 +17,7 @@ import {
 } from './views/reveal';
 import { Layout } from './views/layout';
 import { APP_CSS, FAVICON_SVG } from './styles';
+import { HERO_IMAGE_B64, SEAL_IMAGE_B64 } from './assets';
 
 export interface Bindings {
   DB: D1Database;
@@ -24,7 +25,11 @@ export interface Bindings {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// 0. STATIC ASSETS: FAVICON & CACHED STYLESHEET
+// Pre-decode binary WebP assets for zero-latency streaming
+const heroWebpBytes = Uint8Array.from(atob(HERO_IMAGE_B64), (c) => c.charCodeAt(0));
+const sealWebpBytes = Uint8Array.from(atob(SEAL_IMAGE_B64), (c) => c.charCodeAt(0));
+
+// 0. STATIC ASSETS: FAVICON, CACHED STYLESHEET & OPTIMIZED WEBP IMAGES
 app.get('/styles.css', (c) => {
   c.header('Content-Type', 'text/css; charset=UTF-8');
   c.header('Cache-Control', 'public, max-age=31536000, immutable');
@@ -41,6 +46,18 @@ app.get('/favicon.ico', (c) => {
   c.header('Content-Type', 'image/svg+xml');
   c.header('Cache-Control', 'public, max-age=604800, immutable');
   return c.body(FAVICON_SVG);
+});
+
+app.get('/assets/hero.webp', (c) => {
+  c.header('Content-Type', 'image/webp');
+  c.header('Cache-Control', 'public, max-age=31536000, immutable');
+  return c.body(heroWebpBytes);
+});
+
+app.get('/assets/seal.webp', (c) => {
+  c.header('Content-Type', 'image/webp');
+  c.header('Cache-Control', 'public, max-age=31536000, immutable');
+  return c.body(sealWebpBytes);
 });
 
 // Automatically ensure D1 schema tables exist on first request

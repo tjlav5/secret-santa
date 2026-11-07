@@ -1,120 +1,5 @@
 import type { Child, FC } from 'hono/jsx';
 import { raw } from 'hono/html';
-import { APP_CSS } from '../styles';
-
-export const PostageStamp: FC<{ label?: string; cents?: string }> = ({
-  label = 'NORTH POLE',
-  cents = '25¢',
-}) => (
-  <div class="postage-stamp-box" aria-hidden="true">
-    <span
-      style="font-family: var(--font-mono); font-size: 0.52rem; font-weight: 700; letter-spacing: 0.08em; color: var(--crimson-600); text-transform: uppercase;"
-    >
-      {label}
-    </span>
-    <svg
-      width="30"
-      height="30"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="var(--forest-800)"
-      stroke-width="1.75"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M12 2L7 10h3l-3 6h4v6h2v-6h4l-3-6h3L12 2z" />
-    </svg>
-    <span
-      style="font-family: var(--font-display); font-weight: 700; font-size: 0.78rem; color: var(--ink-900); line-height: 1;"
-    >
-      {cents}
-    </span>
-  </div>
-);
-
-export const PostmarkSeal: FC<{ text?: string }> = ({ text = 'NORTH POLE DISPATCH' }) => (
-  <div
-    style="display: inline-flex; align-items: center; gap: 0.5rem; opacity: 0.85; user-select: none;"
-    aria-hidden="true"
-  >
-    <svg width="112" height="44" viewBox="0 0 112 44" fill="none">
-      <circle
-        cx="22"
-        cy="22"
-        r="19"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-dasharray="3 2"
-      />
-      <circle cx="22" cy="22" r="14" stroke="currentColor" stroke-width="1" />
-      <text
-        x="22"
-        y="20"
-        text-anchor="middle"
-        fill="currentColor"
-        font-size="5.5"
-        font-family="monospace"
-        font-weight="bold"
-      >
-        DEC 25
-      </text>
-      <text
-        x="22"
-        y="27"
-        text-anchor="middle"
-        fill="currentColor"
-        font-size="4.8"
-        font-family="monospace"
-      >
-        {text.slice(0, 10)}
-      </text>
-      <path
-        d="M45 13 C55 9, 63 17, 73 13 C83 9, 91 17, 108 13"
-        stroke="currentColor"
-        stroke-width="1.4"
-        stroke-linecap="round"
-      />
-      <path
-        d="M45 22 C55 18, 63 26, 73 22 C83 18, 91 26, 108 22"
-        stroke="currentColor"
-        stroke-width="1.4"
-        stroke-linecap="round"
-      />
-      <path
-        d="M45 31 C55 27, 63 35, 73 31 C83 27, 91 35, 108 31"
-        stroke="currentColor"
-        stroke-width="1.4"
-        stroke-linecap="round"
-      />
-    </svg>
-  </div>
-);
-
-export const CornerFiligrees: FC = () => {
-  const cornerSvg = (
-    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.75">
-      <path d="M2 30V8C2 4.686 4.686 2 8 2h22" />
-      <path d="M2 16h6a6 6 0 0 0 6-6V2" />
-      <circle cx="7" cy="7" r="1.5" fill="currentColor" />
-    </svg>
-  );
-  return (
-    <>
-      <span class="corner-ornament corner-tl" aria-hidden="true">
-        {cornerSvg}
-      </span>
-      <span class="corner-ornament corner-tr" aria-hidden="true">
-        {cornerSvg}
-      </span>
-      <span class="corner-ornament corner-bl" aria-hidden="true">
-        {cornerSvg}
-      </span>
-      <span class="corner-ornament corner-br" aria-hidden="true">
-        {cornerSvg}
-      </span>
-    </>
-  );
-};
 
 interface LayoutProps {
   title: string;
@@ -138,22 +23,26 @@ export const Layout: FC<LayoutProps> = ({
         <meta name="description" content={description} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="stylesheet" href="/styles.css?v=2026.3" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link rel="stylesheet" href="/styles.css?v=2026.5" />
       </head>
       <body>
-        <div class="airmail-trim" aria-hidden="true"></div>
-
         <header class="site-header">
           <div class="header-inner">
             <a href="/" class="brand-link" id="nav-home-link">
               <span class="brand-crest" aria-hidden="true">
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
@@ -162,7 +51,7 @@ export const Layout: FC<LayoutProps> = ({
               </span>
               <span>
                 <span class="brand-title">North Pole Post</span>
-                <span class="brand-sub">Official Gift Dispatch • Est. 2026</span>
+                <span class="brand-sub">Secret Santa Dispatch</span>
               </span>
             </a>
 
@@ -183,21 +72,77 @@ export const Layout: FC<LayoutProps> = ({
         <main class="main-container">{children}</main>
 
         <footer
-          style="text-align: center; padding: 2.25rem 1.5rem 3.25rem; color: var(--ink-500); font-size: 0.82rem; border-top: 1px solid var(--border-hairline);"
+          style="text-align: center; padding: 3rem 1.5rem 4rem; color: var(--ink-500); font-size: 0.82rem; border-top: 1px solid var(--border-hairline);"
         >
           <p
-            style="font-family: var(--font-display); font-style: italic; font-size: 0.98rem; color: var(--ink-700); margin-bottom: 0.25rem;"
+            style="font-family: var(--font-display); font-style: italic; font-size: 0.96rem; color: var(--ink-700); margin-bottom: 0.35rem;"
           >
             “Sealed with secrecy, delivered with cheer.”
           </p>
           <p>
-            North Pole Post • Powered by Cloudflare Workers &amp; D1 • Zero-Dependency Progressive
-            HTML + CSS View Transitions
+            North Pole Post • Powered by Cloudflare Workers &amp; D1 • Zero Passwords Required
           </p>
         </footer>
 
         <script>
           {raw(`
+            function burstGoldSparks(x, y) {
+              try {
+                var canvas = document.createElement('canvas');
+                canvas.style.position = 'fixed';
+                canvas.style.inset = '0';
+                canvas.style.pointerEvents = 'none';
+                canvas.style.zIndex = '9999';
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                document.body.appendChild(canvas);
+                var ctx = canvas.getContext('2d');
+                var particles = [];
+                var colors = ['#F3DC9B', '#D4A853', '#E6C37A', '#FFFFFF', '#FFA5AC'];
+                for (var i = 0; i < 45; i++) {
+                  var angle = Math.random() * Math.PI * 2;
+                  var speed = Math.random() * 9 + 3;
+                  particles.push({
+                    x: x || window.innerWidth / 2,
+                    y: y || window.innerHeight / 2,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2.5,
+                    size: Math.random() * 3.5 + 1.5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.025 + 0.015
+                  });
+                }
+                var start = performance.now();
+                function loop() {
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+                  var alive = false;
+                  particles.forEach(function(p) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.22;
+                    p.alpha -= p.decay;
+                    if (p.alpha > 0) {
+                      alive = true;
+                      ctx.save();
+                      ctx.globalAlpha = p.alpha;
+                      ctx.fillStyle = p.color;
+                      ctx.beginPath();
+                      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                      ctx.fill();
+                      ctx.restore();
+                    }
+                  });
+                  if (alive && performance.now() - start < 1800) {
+                    requestAnimationFrame(loop);
+                  } else {
+                    canvas.remove();
+                  }
+                }
+                requestAnimationFrame(loop);
+              } catch(e) {}
+            }
+
             function playUnwrapChime() {
               try {
                 var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -224,14 +169,39 @@ export const Layout: FC<LayoutProps> = ({
               navigator.clipboard.writeText(text).then(function() {
                 var original = btnEl.innerHTML;
                 btnEl.innerHTML = copiedLabel || '✓ Copied!';
-                btnEl.style.background = '#18543C';
+                btnEl.style.background = 'linear-gradient(135deg, #1C4D34 0%, #0E2217 100%)';
                 btnEl.style.color = '#FFFFFF';
+                btnEl.style.borderColor = '#D4A853';
                 setTimeout(function() {
                   btnEl.innerHTML = original;
                   btnEl.style.background = '';
                   btnEl.style.color = '';
+                  btnEl.style.borderColor = '';
                 }, 1800);
               });
+            }
+
+            function initTiltEffects() {
+              document.querySelectorAll('[data-tilt]').forEach(function(el) {
+                if (el._hasTilt) return;
+                el._hasTilt = true;
+                el.addEventListener('mousemove', function(e) {
+                  var rect = el.getBoundingClientRect();
+                  var x = e.clientX - rect.left - rect.width / 2;
+                  var y = e.clientY - rect.top - rect.height / 2;
+                  var rx = (y / (rect.height / 2)) * -5;
+                  var ry = (x / (rect.width / 2)) * 5;
+                  el.style.transform = 'perspective(1000px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) scale3d(1.01, 1.01, 1.01)';
+                });
+                el.addEventListener('mouseleave', function() {
+                  el.style.transform = '';
+                });
+              });
+            }
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', initTiltEffects);
+            } else {
+              initTiltEffects();
             }
 
             document.addEventListener('submit', async function(e) {
@@ -252,6 +222,10 @@ export const Layout: FC<LayoutProps> = ({
 
               var isUnwrap = form.getAttribute('data-unwrap') === 'true';
               if (isUnwrap) {
+                var rect = submitBtn ? submitBtn.getBoundingClientRect() : null;
+                var sparkX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+                var sparkY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+                burstGoldSparks(sparkX, sparkY);
                 playUnwrapChime();
                 var env = form.closest('.gift-envelope');
                 if (env) env.classList.add('is-breaking');
@@ -264,7 +238,7 @@ export const Layout: FC<LayoutProps> = ({
                   headers: { 'X-Inline-Target': targetSel }
                 });
                 if (isUnwrap) {
-                  await new Promise(function(r) { setTimeout(r, 260); });
+                  await new Promise(function(r) { setTimeout(r, 280); });
                 }
                 var res = await fetchPromise;
                 var html = await res.text();
@@ -274,6 +248,7 @@ export const Layout: FC<LayoutProps> = ({
                   var current = document.querySelector(targetSel);
                   if (current && replacement) {
                     current.replaceWith(replacement);
+                    initTiltEffects();
                     var autofocusEl = replacement.querySelector('[data-autofocus]');
                     if (autofocusEl && typeof autofocusEl.focus === 'function') {
                       autofocusEl.focus();

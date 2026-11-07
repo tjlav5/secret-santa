@@ -1,5 +1,5 @@
 import type { FC } from 'hono/jsx';
-import { Layout, PostmarkSeal, CornerFiligrees } from './layout';
+import { Layout } from './layout';
 import {
   type EventRecord,
   type ParticipantRecord,
@@ -52,16 +52,15 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
 
       <div class="dashboard-grid">
         {/* LEFT COLUMN: PARTICIPANTS & SHARE LINKS */}
-        <div class="stationery-frame">
-          <CornerFiligrees />
+        <div class="surface-card">
           <div
             style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.35rem; flex-wrap: wrap;"
           >
             <div>
               <div
-                style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--crimson-600); font-weight: 700; margin-bottom: 0.2rem;"
+                style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--forest-800); font-weight: 700; margin-bottom: 0.2rem;"
               >
-                {isDrawn ? 'SEALED PARCEL MANIFEST' : 'EXCHANGE ROSTER LEDGER'}
+                {isDrawn ? 'DISPATCH MANIFEST' : 'PARTICIPANT ROSTER'}
               </div>
               <h2 style="font-size: 1.55rem; margin-bottom: 0.25rem;">
                 {isDrawn ? 'Participant Dispatch Links' : 'Participant Roster'} (
@@ -111,7 +110,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
 
           {participants.length === 0 ? (
             <div
-              style="text-align: center; padding: 2.75rem 1.25rem; background: var(--bg-vellum); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--ink-700);"
+              style="text-align: center; padding: 2.75rem 1.25rem; background: var(--bg-muted); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--ink-700);"
             >
               No participants yet. Add at least 2 people above to begin!
             </div>
@@ -270,10 +269,10 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                     style={
                       participants.length < 2
                         ? 'opacity: 0.55; cursor: not-allowed;'
-                        : 'padding: 0.9rem 1.35rem; font-size: 0.96rem;'
+                        : 'height: 44px;'
                     }
                   >
-                    🎁 Seal Envelopes &amp; Draw Names
+                    ✦ Seal Envelopes &amp; Draw Names
                   </button>
                 </form>
                 {participants.length < 2 && (
@@ -310,7 +309,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                   data-target="#organizer-workspace"
                   data-confirm="Are you sure you want to reset the draw? Existing assignments will be cleared so you can edit participants or redraw."
                 >
-                  <button type="submit" class="btn btn-secondary btn-full" id="reset-draw-btn">
+                  <button type="submit" class="btn btn-danger btn-sm btn-full" id="reset-draw-btn">
                     ↺ Reset Draw &amp; Unlock Roster
                   </button>
                 </form>
@@ -332,7 +331,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                 method="post"
                 action={`/events/${event.id}/exclusions${keyQuery}`}
                 data-target="#organizer-workspace"
-                style="background: var(--bg-vellum); border: 1px solid var(--border-hairline); padding: 1.1rem; border-radius: var(--radius-sm); margin-bottom: 1.1rem;"
+                style="background: var(--bg-muted); border: 1px solid var(--border-hairline); padding: 1.1rem; border-radius: var(--radius-sm); margin-bottom: 1.1rem;"
                 id="add-exclusion-form"
               >
                 <div class="form-row-2" style="margin-bottom: 0.85rem;">
@@ -501,12 +500,7 @@ export const DashboardPage: FC<DashboardProps> = (props) => {
       <div class="pine-banner" style="margin-bottom: 2.15rem;">
         <div class="banner-split">
           <div>
-            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.65rem; flex-wrap: wrap;">
-              <span class="badge badge-gold">✦ Hosted by {event.organizer_name}</span>
-              <div style="color: var(--gold-400);">
-                <PostmarkSeal text="DISPATCH HQ" />
-              </div>
-            </div>
+            <span class="badge badge-gold" style="margin-bottom: 0.65rem;">✦ Hosted by {event.organizer_name}</span>
             <h1 style="font-size: clamp(1.95rem, 3.8vw, 2.75rem); margin-bottom: 0.45rem;">
               {event.title}
             </h1>
@@ -519,30 +513,29 @@ export const DashboardPage: FC<DashboardProps> = (props) => {
             )}
           </div>
 
-          <div
-            style="background: rgba(6, 16, 12, 0.62); border: 1px solid hsla(40, 72%, 62%, 0.38); padding: 1.15rem 1.35rem; border-radius: var(--radius-md); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);"
-          >
-            <div
-              style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--gold-400); margin-bottom: 0.45rem;"
-            >
-              <span>🔑 Master Organizer Key</span>
-              <span style="color: rgba(249, 246, 240, 0.65); font-family: var(--font-mono);">
-                BOOKMARK THIS URL
-              </span>
+          <div class="organizer-dispatch-bar">
+            <div class="dispatch-bar-label">
+              <span class="title">🔑 Organizer Private Key</span>
+              <span class="hint">Bookmark to manage</span>
             </div>
-            <div class="copy-box" style="margin-bottom: 0.7rem;">
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                {adminUrl}
-              </span>
+            <div class="dispatch-bar-controls">
+              <input
+                type="text"
+                readonly
+                value={adminUrl}
+                class="dispatch-url-input"
+                onclick="this.select()"
+                aria-label="Organizer Private Link"
+              />
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                id="copy-admin-url-btn"
+                onclick={`copyToClipboard(${JSON.stringify(adminUrl)}, this, '✓ Copied')`}
+              >
+                Copy Link
+              </button>
             </div>
-            <button
-              type="button"
-              class="btn btn-gold btn-sm btn-full"
-              id="copy-admin-url-btn"
-              onclick={`copyToClipboard(${JSON.stringify(adminUrl)}, this, '✓ Organizer Link Copied!')`}
-            >
-              📋 Copy Organizer Dispatch Link
-            </button>
           </div>
         </div>
 

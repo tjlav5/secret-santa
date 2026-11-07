@@ -1,5 +1,5 @@
 import type { FC } from 'hono/jsx';
-import { Layout, PostageStamp, PostmarkSeal, CornerFiligrees } from './layout';
+import { Layout } from './layout';
 import { type EventRecord, type ParticipantRecord, parseWishlistLinks } from '../db';
 
 export interface RevealPageProps {
@@ -32,82 +32,57 @@ export const UnwrappedMatchCard: FC<{
 
   return (
     <div class="unwrapped-card" id="reveal-card-container">
-      <CornerFiligrees />
-
-      {/* Top Certificate Stamp & Postmark Header */}
+      {/* Top Header */}
       <div
-        style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.15rem; flex-wrap: wrap;"
+        style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;"
       >
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span class="badge badge-success">✦ Official Secret Santa Assignment</span>
-          <button
-            type="button"
-            class="btn btn-ghost btn-sm"
-            style="font-size: 0.72rem; border: 1px solid var(--border-hairline); padding: 0.22rem 0.6rem;"
-            onclick="var el = document.getElementById('revealed-recipient-name'); var blurred = el.style.filter.includes('blur'); el.style.filter = blurred ? 'none' : 'blur(14px)'; this.textContent = blurred ? '🔒 Hide Name' : '👁️ Show Name';"
-            title="Blur your match's name if someone is walking by"
-          >
-            🔒 Hide Name
-          </button>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 0.35rem; color: var(--gold-600);">
-          <PostmarkSeal text="VERIFIED MATCH" />
-          <PostageStamp label="NORTH POLE" cents="NO. 1" />
-        </div>
+        <span class="badge badge-success">✦ Official Secret Santa Assignment</span>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          style="font-size: 0.74rem; border: 1px solid var(--border-subtle); padding: 0.25rem 0.65rem;"
+          onclick="var el = document.getElementById('revealed-recipient-name'); var blurred = el.style.filter.includes('blur'); el.style.filter = blurred ? 'none' : 'blur(14px)'; this.textContent = blurred ? '🔒 Hide Name' : '👁️ Show Name';"
+          title="Blur your match's name if someone is walking by"
+        >
+          🔒 Hide Name
+        </button>
       </div>
 
       <p
-        style="font-family: var(--font-display); font-style: italic; font-size: 1.2rem; color: var(--ink-700);"
+        style="font-family: var(--font-display); font-style: italic; font-size: 1.25rem; color: var(--ink-700);"
       >
         {participant.name}, you are the Secret Santa for:
       </p>
 
-      <div class="recipient-name-lockup">
-        <span
-          class="sparkle-star"
-          style="top: 6px; left: -6px; animation-delay: 0s;"
-          aria-hidden="true"
-        >
-          ✦
-        </span>
-        <span
-          class="sparkle-star"
-          style="bottom: 10px; right: -8px; animation-delay: 0.8s;"
-          aria-hidden="true"
-        >
-          ✦
-        </span>
-        <div
-          class="recipient-name-display"
-          id="revealed-recipient-name"
-          style="transition: filter 0.22s ease;"
-        >
-          {assignedRecipient.name}
-        </div>
+      <div
+        class="recipient-name-display"
+        id="revealed-recipient-name"
+        style="transition: filter 0.22s ease;"
+      >
+        {assignedRecipient.name}
       </div>
 
       <div class="ornate-divider">
         <span>✻</span>
       </div>
 
-      <p style="font-size: 0.9rem; color: var(--ink-700); margin-bottom: 1.6rem;">
+      <p style="font-size: 0.9rem; color: var(--ink-700); margin-bottom: 1.85rem;">
         Suggested Spending Limit: <strong>{event.budget || 'Flexible'}</strong>
         {event.exchange_date ? ` • Exchange Date: ${event.exchange_date}` : ''}
       </p>
 
       {/* RECIPIENT WISHLIST SECTION */}
       <div
-        style="text-align: left; background: var(--bg-vellum); border: 1px solid var(--border-strong); border-radius: var(--radius-md); padding: 1.45rem 1.65rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);"
+        style="text-align: left; background: rgba(6, 17, 11, 0.75); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem 1.75rem;"
       >
         <div
-          style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.7rem; flex-wrap: wrap;"
+          style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.85rem; flex-wrap: wrap;"
         >
-          <h3 style="font-size: 1.22rem;">
-            🎁 {assignedRecipient.name}’s Wishlist &amp; Gift Hints
+          <h3 style="font-size: 1.2rem; color: #FAF8F5;">
+            🎁 {assignedRecipient.name}’s Wishlist &amp; Preferences
           </h3>
-          <span class="badge badge-pending" style="font-family: var(--font-mono); font-size: 0.65rem;">
-            ✦ Live Synced Dispatch
+          <span class="badge badge-pending" style="font-size: 0.65rem;">
+            Live Synced
           </span>
         </div>
 
@@ -120,7 +95,7 @@ export const UnwrappedMatchCard: FC<{
           <>
             {hasRecipientNotes && (
               <div
-                style="white-space: pre-wrap; font-size: 0.98rem; font-family: var(--font-display); color: var(--ink-900); background: var(--bg-paper); padding: 1.05rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); border-left: 3.5px solid var(--crimson-600); margin-bottom: 1rem; box-shadow: 0 2px 6px rgba(12, 28, 21, 0.04);"
+                style="white-space: pre-wrap; font-size: 0.96rem; font-family: var(--font-display); color: #FAF8F5; background: rgba(14, 29, 21, 0.9); padding: 1.15rem 1.35rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.1rem; box-shadow: var(--shadow-sm);"
               >
                 “{assignedRecipient.wishlist_notes}”
               </div>
@@ -129,7 +104,7 @@ export const UnwrappedMatchCard: FC<{
             {recipientLinks.length > 0 && (
               <div>
                 <strong
-                  style="display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-700); margin-bottom: 0.5rem;"
+                  style="display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-400); margin-bottom: 0.55rem;"
                 >
                   Requested Gift Links ({recipientLinks.length}):
                 </strong>
@@ -141,13 +116,13 @@ export const UnwrappedMatchCard: FC<{
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn btn-secondary btn-sm"
-                        style="justify-content: space-between; width: 100%; text-align: left; background: #FFFFFF; padding: 0.6rem 0.95rem;"
+                        style="justify-content: space-between; width: 100%; text-align: left; padding: 0.65rem 1rem;"
                       >
                         <span style="overflow: hidden; text-overflow: ellipsis; font-weight: 600;">
                           🔗 {link.title || link.url}
                         </span>
-                        <span style="color: var(--crimson-600); font-weight: 700;">
-                          Open Item ↗
+                        <span style="color: var(--gold-300); font-weight: 700;">
+                          Open Link ↗
                         </span>
                       </a>
                     </li>
@@ -171,25 +146,19 @@ export const ParticipantWishlistEditor: FC<{
 
   return (
     <div
-      class="stationery-frame"
+      class="surface-card"
       id="participant-wishlist-section"
-      style="view-transition-name: wishlist-editor;"
+      style="view-transition-name: wishlist-editor; margin-top: 2rem;"
     >
-      <CornerFiligrees />
       <div
         style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.45rem; flex-wrap: wrap;"
       >
         <div>
-          <div
-            style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--forest-800); font-weight: 700; margin-bottom: 0.15rem;"
-          >
-            OUTGOING NORTH POLE TELEGRAM
-          </div>
-          <h2 style="font-size: 1.5rem;">Your Letter to Your Secret Santa</h2>
+          <h2 style="font-size: 1.5rem;">Your Wishlist for Your Secret Santa</h2>
         </div>
         {wishlistSaved && <span class="badge badge-success">✓ Posted to Your Santa’s Card!</span>}
       </div>
-      <p style="font-size: 0.9rem; color: var(--ink-700); margin-bottom: 1.35rem;">
+      <p style="font-size: 0.9rem; color: var(--ink-700); margin-bottom: 1.45rem;">
         Help your anonymous Secret Santa choose something thoughtful! Share gift ideas, clothing
         sizes, favorite coffee or snacks, hobbies, or allergies.
       </p>
@@ -217,13 +186,13 @@ export const ParticipantWishlistEditor: FC<{
         </div>
 
         <button type="submit" class="btn btn-pine" id="save-wishlist-notes-btn">
-          ✦ Save Wishlist Notes
+          Save Wishlist Notes
         </button>
       </form>
 
       {/* WISHLIST LINKS */}
       <div
-        style="margin-top: 1.85rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-strong);"
+        style="margin-top: 1.85rem; padding-top: 1.5rem; border-top: 1px solid var(--border-hairline);"
       >
         <h3 style="font-size: 1.15rem; margin-bottom: 0.3rem;">
           Specific Item Links ({links.length})
@@ -235,7 +204,7 @@ export const ParticipantWishlistEditor: FC<{
         {links.length > 0 && (
           <ul class="participant-list" style="margin-bottom: 1.15rem;">
             {links.map((item, idx) => (
-              <li class="participant-item" style="padding: 0.7rem 0.95rem;" key={idx}>
+              <li class="participant-item" style="padding: 0.75rem 0.95rem;" key={idx}>
                 <div style="min-width: 0;">
                   <a
                     href={item.url}
@@ -270,7 +239,7 @@ export const ParticipantWishlistEditor: FC<{
           method="post"
           action={`/reveal/${participant.token}/links`}
           data-target="#participant-wishlist-section"
-          style="background: var(--bg-vellum); border: 1px solid var(--border-hairline); padding: 1.1rem; border-radius: var(--radius-sm);"
+          style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); padding: 1.15rem; border-radius: var(--radius-sm);"
           id="add-wishlist-link-form"
         >
           <div class="form-row-2" style="margin-bottom: 0.85rem;">
@@ -330,36 +299,31 @@ export const RevealPage: FC<RevealPageProps> = ({
       }
     >
       <div class="narrow-container">
-        <div class="pine-banner" style="margin-bottom: 1.85rem; text-align: center;">
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;"
-          >
-            <span class="badge badge-gold">✦ Hosted by {event.organizer_name}</span>
-            <span class="postmark-stamp">NORTH POLE • SPECIAL DELIVERY</span>
-          </div>
+        <div class="pine-banner" style="margin-bottom: 2rem; text-align: center;">
+          <span class="badge badge-gold" style="margin-bottom: 0.75rem;">✦ Hosted by {event.organizer_name}</span>
           <h1 style="font-size: clamp(1.95rem, 4.2vw, 2.7rem); margin-bottom: 0.45rem;">
             {event.title}
           </h1>
-          <p style="color: rgba(249, 246, 240, 0.92); font-size: 1.04rem;">
+          <p style="color: rgba(250, 248, 245, 0.92); font-size: 1.04rem;">
             Welcome, <strong>{participant.name}</strong>! Bookmark this private link to check your
             assignment or update your wishlist anytime.
           </p>
           {event.notes && (
             <p
-              style="margin-top: 0.8rem; font-size: 0.96rem; font-family: var(--font-display); font-style: italic; color: var(--gold-200); max-width: 55ch; margin-left: auto; margin-right: auto;"
+              style="margin-top: 0.85rem; font-size: 0.96rem; font-family: var(--font-display); font-style: italic; color: var(--gold-300); max-width: 55ch; margin-left: auto; margin-right: auto;"
             >
               “{event.notes}”
             </p>
           )}
           <div class="meta-strip" style="justify-content: center;">
             <div>
-              <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.35rem;">
+              <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.08em; margin-right: 0.35rem;">
                 Spending Limit:
               </strong>
               <span>{event.budget || 'Flexible'}</span>
             </div>
             <div>
-              <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.35rem;">
+              <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.08em; margin-right: 0.35rem;">
                 Exchange Date:
               </strong>
               <span>{event.exchange_date || 'TBD'}</span>
@@ -371,12 +335,11 @@ export const RevealPage: FC<RevealPageProps> = ({
         <div class="reveal-stage">
           {!isDrawn ? (
             <div
-              class="stationery-frame"
-              style="text-align: center; padding: 2.75rem 2rem;"
+              class="surface-card"
+              style="text-align: center; padding: 3rem 2rem;"
               id="reveal-card-container"
             >
-              <CornerFiligrees />
-              <div class="wax-seal" style="margin-bottom: 1.1rem;">
+              <div class="wax-seal" style="margin-bottom: 1.25rem;">
                 <svg
                   width="32"
                   height="32"
@@ -395,59 +358,53 @@ export const RevealPage: FC<RevealPageProps> = ({
                 Awaiting the Official Draw
               </h2>
               <p style="color: var(--ink-700); max-width: 46ch; margin: 0 auto;">
-                {event.organizer_name} is still gathering everyone. Fill out your wishlist below so
-                it is ready for your Secret Santa the moment names are drawn!
+                {event.organizer_name} is still gathering participants. Fill out your wishlist below
+                so it is ready the moment names are drawn!
               </p>
             </div>
           ) : !isUnwrapped ? (
             <div class="gift-envelope" id="reveal-card-container">
-              <CornerFiligrees />
-              <div class="wax-seal" aria-hidden="true">
-                <svg
-                  width="36"
-                  height="36"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="20 12 20 22 4 22 4 12" />
-                  <rect x="2" y="7" width="20" height="5" />
-                  <line x1="12" y1="22" x2="12" y2="7" />
-                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-                </svg>
-              </div>
-              <div
-                style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-300); margin-bottom: 0.4rem; position: relative; z-index: 2;"
-              >
-                ✦ CONFIDENTIAL DISPATCH • FOR {participant.name.toUpperCase()} ONLY ✦
-              </div>
-              <h2
-                style="color: #FFFDF9; font-size: clamp(1.8rem, 3.8vw, 2.4rem); margin-bottom: 0.55rem; position: relative; z-index: 2;"
-              >
-                Your Secret Santa Match is Sealed Inside
-              </h2>
-              <p
-                style="color: rgba(255, 253, 249, 0.88); max-width: 44ch; margin: 0 auto 1.85rem; font-size: 0.98rem; position: relative; z-index: 2;"
-              >
-                Make sure nobody is peeking over your shoulder, then break the golden wax seal to
-                reveal who you are buying a gift for.
-              </p>
               <form
                 method="post"
                 action={`/reveal/${participant.token}/unwrap`}
                 data-target="#reveal-card-container"
                 data-unwrap="true"
-                style="position: relative; z-index: 2;"
               >
+                <button
+                  type="submit"
+                  class="wax-seal-medallion"
+                  aria-label="Break golden wax seal and unwrap match"
+                  title="Click to break the wax seal"
+                  style="background: none; border: none; padding: 0; outline: none;"
+                >
+                  <img
+                    src="/assets/seal.webp"
+                    alt="Authentic embossed antique gold wax seal"
+                    width="116"
+                    height="116"
+                  />
+                </button>
+                <div
+                  style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-300); margin-bottom: 0.45rem;"
+                >
+                  CONFIDENTIAL DISPATCH • FOR {participant.name.toUpperCase()} ONLY
+                </div>
+                <h2
+                  style="color: #FFFDF9; font-size: clamp(1.85rem, 4vw, 2.45rem); margin-bottom: 0.55rem;"
+                >
+                  Your Secret Santa Match is Sealed Inside
+                </h2>
+                <p
+                  style="color: rgba(255, 253, 249, 0.88); max-width: 44ch; margin: 0 auto 2rem; font-size: 1rem;"
+                >
+                  Make sure nobody is peeking over your shoulder, then click the golden wax seal or
+                  the button below to break the seal and reveal who you are gifting.
+                </p>
                 <button
                   type="submit"
                   class="btn btn-gold"
                   id="unwrap-match-btn"
-                  style="font-size: 1.05rem; padding: 0.95rem 2.15rem;"
+                  style="font-size: 1.05rem; padding: 0.95rem 2.2rem;"
                 >
                   ✦ Break Wax Seal &amp; Unwrap Match
                 </button>
