@@ -1,6 +1,11 @@
 import type { FC } from 'hono/jsx';
-import { Layout } from './layout';
-import { type EventRecord, type ParticipantRecord, type ExclusionRecord, parseWishlistLinks } from '../db';
+import { Layout, PostmarkSeal, CornerFiligrees } from './layout';
+import {
+  type EventRecord,
+  type ParticipantRecord,
+  type ExclusionRecord,
+  parseWishlistLinks,
+} from '../db';
 
 export interface DashboardProps {
   event: EventRecord;
@@ -31,6 +36,8 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
       (p.wishlist_notes && p.wishlist_notes.trim().length > 0) ||
       parseWishlistLinks(p.wishlist_links).length > 0
   ).length;
+  const progressPct =
+    participants.length > 0 ? Math.round((unwrappedCount / participants.length) * 100) : 0;
 
   const bulkShareText = participants
     .map((p) => `${p.name}: ${origin}/reveal/${p.token}`)
@@ -39,24 +46,31 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
   const keyQuery = `?key=${encodeURIComponent(event.admin_key)}`;
 
   return (
-    <div id="organizer-workspace">
+    <div id="organizer-workspace" style="view-transition-name: organizer-workspace;">
       {flashError && <div class="alert alert-error">{flashError}</div>}
       {flashSuccess && <div class="alert alert-success">{flashSuccess}</div>}
 
       <div class="dashboard-grid">
         {/* LEFT COLUMN: PARTICIPANTS & SHARE LINKS */}
-        <div class="surface-card">
+        <div class="stationery-frame">
+          <CornerFiligrees />
           <div
-            style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;"
+            style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.35rem; flex-wrap: wrap;"
           >
             <div>
-              <h2 style="font-size: 1.4rem;">
-                {isDrawn ? 'Participant Invite Links' : 'Participants'} ({participants.length})
+              <div
+                style="font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--crimson-600); font-weight: 700; margin-bottom: 0.2rem;"
+              >
+                {isDrawn ? 'SEALED PARCEL MANIFEST' : 'EXCHANGE ROSTER LEDGER'}
+              </div>
+              <h2 style="font-size: 1.55rem; margin-bottom: 0.25rem;">
+                {isDrawn ? 'Participant Dispatch Links' : 'Participant Roster'} (
+                {participants.length})
               </h2>
-              <p style="font-size: 0.875rem; color: var(--text-secondary);">
+              <p style="font-size: 0.88rem; color: var(--ink-700);">
                 {isDrawn
-                  ? 'Send each person their private link via iMessage, WhatsApp, Slack, or email. Matches stay hidden!'
-                  : 'Add everyone taking part in this Secret Santa exchange.'}
+                  ? 'Send each person their private wax-sealed link via iMessage, WhatsApp, Slack, or email.'
+                  : 'Add everyone taking part in this Secret Santa gift exchange.'}
               </p>
             </div>
 
@@ -97,35 +111,41 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
 
           {participants.length === 0 ? (
             <div
-              style="text-align: center; padding: 2.5rem 1rem; background: var(--bg-subtle); border-radius: var(--radius-md); color: var(--text-secondary);"
+              style="text-align: center; padding: 2.75rem 1.25rem; background: var(--bg-vellum); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--ink-700);"
             >
-              No participants yet. Add at least 2 people above to get started!
+              No participants yet. Add at least 2 people above to begin!
             </div>
           ) : (
             <ul class="participant-list">
               {participants.map((p) => {
                 const revealUrl = `${origin}/reveal/${p.token}`;
-                const shareMessage = `🎁 Hi ${p.name}! Here is your private Secret Santa link for "${event.title}": ${revealUrl}`;
+                const shareMessage = `🎁 Hi ${p.name}! Here is your private wax-sealed Secret Santa envelope for "${event.title}": ${revealUrl}`;
                 const whatsappHref = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
                 const smsHref = `sms:?&body=${encodeURIComponent(shareMessage)}`;
                 const hasWishlist =
                   (p.wishlist_notes && p.wishlist_notes.trim().length > 0) ||
                   parseWishlistLinks(p.wishlist_links).length > 0;
+                const isUnwrapped = Boolean(p.unwrapped_at);
 
                 return (
-                  <li class="participant-item" key={p.id}>
+                  <li
+                    class={`participant-item ${isDrawn ? (isUnwrapped ? 'is-unwrapped' : 'is-sealed') : ''}`}
+                    key={p.id}
+                  >
                     <div style="display: flex; align-items: center; gap: 0.85rem; min-width: 0;">
-                      <span class="participant-avatar">
+                      <span
+                        class={`participant-avatar ${isDrawn ? (isUnwrapped ? 'avatar-pine' : 'avatar-crimson') : ''}`}
+                      >
                         {p.name.trim().charAt(0).toUpperCase()}
                       </span>
                       <div style="min-width: 0;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                          <strong style="font-size: 1rem;">{p.name}</strong>
+                        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                          <strong style="font-size: 1.06rem; font-family: var(--font-display);">
+                            {p.name}
+                          </strong>
                           {isDrawn && (
-                            <span
-                              class={`badge ${p.unwrapped_at ? 'badge-success' : 'badge-pending'}`}
-                            >
-                              {p.unwrapped_at ? '✓ Unwrapped' : 'Sealed Envelope'}
+                            <span class={`badge ${isUnwrapped ? 'badge-success' : 'badge-pending'}`}>
+                              {isUnwrapped ? '✓ Seal Broken' : '● Wax Sealed'}
                             </span>
                           )}
                           {hasWishlist && (
@@ -136,7 +156,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                         </div>
                         {isDrawn && (
                           <div
-                            style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 340px;"
+                            style="font-family: var(--font-mono); font-size: 0.73rem; color: var(--ink-500); margin-top: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 310px;"
                           >
                             {revealUrl}
                           </div>
@@ -153,7 +173,15 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                             id={`copy-link-${p.id}`}
                             onclick={`copyToClipboard(${JSON.stringify(revealUrl)}, this, '✓ Link Copied')`}
                           >
-                            📋 Copy Link
+                            Copy Link
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-secondary btn-sm"
+                            title="Copy formatted invite message with link"
+                            onclick={`copyToClipboard(${JSON.stringify(shareMessage)}, this, '✓ Invite Copied')`}
+                          >
+                            Invite Note
                           </button>
                           <a
                             href={whatsappHref}
@@ -162,14 +190,14 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                             class="btn btn-secondary btn-sm"
                             title="Share via WhatsApp"
                           >
-                            💬 WhatsApp
+                            WhatsApp
                           </a>
                           <a
                             href={smsHref}
                             class="btn btn-secondary btn-sm"
                             title="Share via SMS / iMessage"
                           >
-                            📱 SMS
+                            iMessage
                           </a>
                           <a
                             href={`/reveal/${p.token}`}
@@ -217,14 +245,17 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
 
         {/* RIGHT COLUMN: DRAW CONTROLS & EXCLUSION RULES */}
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-          {/* DRAW ACTION CARD */}
+          {/* DRAW ACTION & TELEMETRY CARD */}
           <div class="surface-card">
             {!isDrawn ? (
               <>
-                <h3 style="font-size: 1.25rem; margin-bottom: 0.4rem;">Ready to Draw Names?</h3>
-                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-                  Our constrained matching solver pairs every participant fairly so nobody draws
-                  themselves or anyone on their exclusion list.
+                <span class="badge badge-pending" style="margin-bottom: 0.65rem;">
+                  Step 2 • Matching Engine
+                </span>
+                <h3 style="font-size: 1.38rem; margin-bottom: 0.4rem;">Ready to Draw Names?</h3>
+                <p style="font-size: 0.88rem; color: var(--ink-700); margin-bottom: 1.35rem;">
+                  Our constrained derangement solver pairs everyone into a single gift cycle so
+                  nobody draws themselves or anyone on their exclusion list.
                 </p>
                 <form
                   method="post"
@@ -236,13 +267,17 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                     class="btn btn-primary btn-full"
                     id="draw-names-btn"
                     disabled={participants.length < 2}
-                    style={participants.length < 2 ? 'opacity: 0.55; cursor: not-allowed;' : ''}
+                    style={
+                      participants.length < 2
+                        ? 'opacity: 0.55; cursor: not-allowed;'
+                        : 'padding: 0.9rem 1.35rem; font-size: 0.96rem;'
+                    }
                   >
-                    🎁 Draw Secret Santa Names Now
+                    🎁 Seal Envelopes &amp; Draw Names
                   </button>
                 </form>
                 {participants.length < 2 && (
-                  <span class="form-hint" style="text-align: center; margin-top: 0.5rem;">
+                  <span class="form-hint" style="text-align: center; margin-top: 0.55rem;">
                     Add at least {2 - participants.length} more participant(s) to enable the draw.
                   </span>
                 )}
@@ -250,17 +285,24 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
             ) : (
               <>
                 <div
-                  style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;"
+                  style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; flex-wrap: wrap; gap: 0.5rem;"
                 >
-                  <span class="badge badge-success">✓ Names Drawn</span>
-                  <span style="font-size: 0.8rem; color: var(--text-muted);">
-                    {unwrappedCount} of {participants.length} unwrapped • {wishlistCount} wishlists
+                  <span class="badge badge-success">✓ Official Draw Complete</span>
+                  <span
+                    style="font-size: 0.74rem; font-weight: 700; color: var(--ink-700); font-family: var(--font-mono);"
+                  >
+                    {unwrappedCount}/{participants.length} UNWRAPPED • {wishlistCount} WISHLISTS
                   </span>
                 </div>
-                <h3 style="font-size: 1.25rem; margin-bottom: 0.4rem;">Exchange is Live!</h3>
-                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-                  Share each participant's private link from the list. Need to add someone or
-                  change rules? You can reset the draw below.
+
+                <div class="seal-progress-track" title={`${progressPct}% of envelopes unwrapped`}>
+                  <div class="seal-progress-fill" style={`width: ${Math.max(progressPct, 6)}%;`}></div>
+                </div>
+
+                <h3 style="font-size: 1.35rem; margin-bottom: 0.35rem;">Envelopes Are Sealed!</h3>
+                <p style="font-size: 0.86rem; color: var(--ink-700); margin-bottom: 1.25rem;">
+                  Dispatch each participant’s private link from the manifest. Need to add someone
+                  late or adjust exclusions? You can unlock and redraw below.
                 </p>
                 <form
                   method="post"
@@ -268,12 +310,8 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                   data-target="#organizer-workspace"
                   data-confirm="Are you sure you want to reset the draw? Existing assignments will be cleared so you can edit participants or redraw."
                 >
-                  <button
-                    type="submit"
-                    class="btn btn-secondary btn-full"
-                    id="reset-draw-btn"
-                  >
-                    ↺ Reset &amp; Unlock Participant List
+                  <button type="submit" class="btn btn-secondary btn-full" id="reset-draw-btn">
+                    ↺ Reset Draw &amp; Unlock Roster
                   </button>
                 </form>
               </>
@@ -282,11 +320,11 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
 
           {/* EXCLUSION RULES CARD */}
           <div class="surface-card">
-            <h3 style="font-size: 1.2rem; margin-bottom: 0.35rem;">
-              Exclusion Rules ({exclusions.length})
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.3rem;">
+              Household &amp; Couple Exclusions ({exclusions.length})
             </h3>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.1rem;">
-              Prevent couples, partners, or roommates from drawing each other.
+            <p style="font-size: 0.85rem; color: var(--ink-700); margin-bottom: 1.15rem;">
+              Prevent spouses, partners, or roommates from drawing each other.
             </p>
 
             {!isDrawn && participants.length >= 2 && (
@@ -294,19 +332,19 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                 method="post"
                 action={`/events/${event.id}/exclusions${keyQuery}`}
                 data-target="#organizer-workspace"
-                style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;"
+                style="background: var(--bg-vellum); border: 1px solid var(--border-hairline); padding: 1.1rem; border-radius: var(--radius-sm); margin-bottom: 1.1rem;"
                 id="add-exclusion-form"
               >
-                <div class="form-row-2" style="margin-bottom: 0.75rem;">
+                <div class="form-row-2" style="margin-bottom: 0.85rem;">
                   <div>
-                    <label class="form-label" style="font-size: 0.78rem;" for="ex-person-a">
+                    <label class="form-label" style="font-size: 0.72rem;" for="ex-person-a">
                       Person A
                     </label>
                     <select
                       name="participant_id"
                       id="ex-person-a"
                       class="select-field"
-                      style="padding: 0.5rem;"
+                      style="padding: 0.55rem 0.75rem; font-size: 0.88rem;"
                       required
                     >
                       <option value="">Select person...</option>
@@ -318,14 +356,14 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label class="form-label" style="font-size: 0.78rem;" for="ex-person-b">
-                      Cannot Draw Person B
+                    <label class="form-label" style="font-size: 0.72rem;" for="ex-person-b">
+                      Cannot Draw B
                     </label>
                     <select
                       name="excluded_participant_id"
                       id="ex-person-b"
                       class="select-field"
-                      style="padding: 0.5rem;"
+                      style="padding: 0.55rem 0.75rem; font-size: 0.88rem;"
                       required
                     >
                       <option value="">Select person...</option>
@@ -341,12 +379,18 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                   style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;"
                 >
                   <label
-                    style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;"
+                    style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; color: var(--ink-700); cursor: pointer;"
                   >
-                    <input type="checkbox" name="mutual" value="1" checked />
-                    Mutual (neither can draw the other)
+                    <input
+                      type="checkbox"
+                      name="mutual"
+                      value="1"
+                      checked
+                      style="accent-color: var(--forest-800);"
+                    />
+                    Mutual (neither draws the other)
                   </label>
-                  <button type="submit" class="btn btn-secondary btn-sm" id="add-exclusion-btn">
+                  <button type="submit" class="btn btn-pine btn-sm" id="add-exclusion-btn">
                     + Add Rule
                   </button>
                 </div>
@@ -354,7 +398,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
             )}
 
             {exclusions.length === 0 ? (
-              <p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
+              <p style="font-size: 0.85rem; color: var(--ink-500); font-style: italic;">
                 No exclusion rules set. Anyone can draw anyone else (except themselves).
               </p>
             ) : (
@@ -366,7 +410,7 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                   return (
                     <li
                       class="participant-item"
-                      style="padding: 0.55rem 0; font-size: 0.875rem;"
+                      style="padding: 0.65rem 0.9rem; font-size: 0.86rem;"
                       key={ex.id}
                     >
                       <span>
@@ -400,14 +444,14 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
             <div class="surface-card-compact">
               <details id="emergency-spoilers-details">
                 <summary
-                  style="cursor: pointer; font-weight: 600; font-size: 0.875rem; color: var(--text-secondary); user-select: none;"
+                  style="cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--ink-700); user-select: none;"
                 >
                   👁️ Emergency Organizer Master List (Warning: Spoilers!)
                 </summary>
                 <div
-                  style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid var(--border-warm); font-size: 0.875rem;"
+                  style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed var(--border-strong); font-size: 0.88rem;"
                 >
-                  <p style="color: var(--status-error-text); margin-bottom: 0.65rem; font-size: 0.8rem;">
+                  <p style="color: var(--crimson-600); margin-bottom: 0.65rem; font-size: 0.8rem;">
                     Only expand if you need to manually check who someone was assigned!
                   </p>
                   <ul class="participant-list">
@@ -418,13 +462,13 @@ export const OrganizerWorkspace: FC<DashboardProps> = ({
                       return (
                         <li
                           class="participant-item"
-                          style="padding: 0.45rem 0;"
+                          style="padding: 0.55rem 0.85rem;"
                           key={giver.id}
                         >
                           <span>
                             <strong>{giver.name}</strong> is Secret Santa for:
                           </span>
-                          <strong style="color: var(--bg-crimson);">
+                          <strong style="color: var(--crimson-600); font-family: var(--font-display); font-size: 1rem;">
                             {receiver ? receiver.name : 'Unassigned'}
                           </strong>
                         </li>
@@ -447,67 +491,81 @@ export const DashboardPage: FC<DashboardProps> = (props) => {
 
   return (
     <Layout
-      title={`${event.title} — Organizer Dashboard`}
+      title={`${event.title} — Organizer Dispatch`}
       headerRight={
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <span class="badge badge-pending">Organizer View</span>
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span class="badge badge-pending">Organizer Dispatch</span>
           <a href="/" class="btn btn-secondary btn-sm">
             + New Exchange
           </a>
         </div>
       }
     >
-      <div class="pine-banner" style="margin-bottom: 2rem;">
-        <div
-          style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;"
-        >
+      <div class="pine-banner" style="margin-bottom: 2.15rem;">
+        <div class="banner-split">
           <div>
-            <span class="badge badge-gold" style="margin-bottom: 0.65rem;">
-              ✦ Organized by {event.organizer_name}
-            </span>
-            <h1 style="font-size: clamp(1.75rem, 3.5vw, 2.5rem); margin-bottom: 0.35rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.65rem; flex-wrap: wrap;">
+              <span class="badge badge-gold">✦ Hosted by {event.organizer_name}</span>
+              <div style="color: var(--gold-400);">
+                <PostmarkSeal text="DISPATCH HQ" />
+              </div>
+            </div>
+            <h1 style="font-size: clamp(1.95rem, 3.8vw, 2.75rem); margin-bottom: 0.45rem;">
               {event.title}
             </h1>
             {event.notes && (
-              <p style="color: rgba(249, 246, 240, 0.85); max-width: 65ch; font-size: 0.95rem;">
-                {event.notes}
+              <p
+                style="color: rgba(249, 246, 240, 0.88); max-width: 58ch; font-size: 0.98rem; font-style: italic; font-family: var(--font-display);"
+              >
+                “{event.notes}”
               </p>
             )}
           </div>
 
           <div
-            style="background: rgba(0, 0, 0, 0.22); border: 1px solid rgba(255, 255, 255, 0.16); padding: 0.9rem 1.1rem; border-radius: var(--radius-md); max-width: 420px; width: 100%;"
+            style="background: rgba(6, 16, 12, 0.62); border: 1px solid hsla(40, 72%, 62%, 0.38); padding: 1.15rem 1.35rem; border-radius: var(--radius-md); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);"
           >
             <div
-              style="font-size: 0.78rem; font-weight: 600; color: #F4D28E; margin-bottom: 0.35rem; display: flex; justify-content: space-between; align-items: center;"
+              style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--gold-400); margin-bottom: 0.45rem;"
             >
-              <span>🔑 Your Private Organizer Link (Bookmark this!)</span>
+              <span>🔑 Master Organizer Key</span>
+              <span style="color: rgba(249, 246, 240, 0.65); font-family: var(--font-mono);">
+                BOOKMARK THIS URL
+              </span>
             </div>
-            <div class="copy-box" style="margin-bottom: 0.5rem;">
+            <div class="copy-box" style="margin-bottom: 0.7rem;">
               <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 {adminUrl}
               </span>
             </div>
             <button
               type="button"
-              class="btn btn-secondary btn-sm btn-full"
+              class="btn btn-gold btn-sm btn-full"
               id="copy-admin-url-btn"
               onclick={`copyToClipboard(${JSON.stringify(adminUrl)}, this, '✓ Organizer Link Copied!')`}
             >
-              📋 Copy Organizer Dashboard Link
+              📋 Copy Organizer Dispatch Link
             </button>
           </div>
         </div>
 
         <div class="meta-strip">
           <div>
-            <strong>Spending Limit:</strong> {event.budget || 'Flexible / Not specified'}
+            <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.35rem;">
+              Spending Limit:
+            </strong>
+            <span>{event.budget || 'Flexible / Open'}</span>
           </div>
           <div>
-            <strong>Exchange Date:</strong> {event.exchange_date || 'TBD'}
+            <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.35rem;">
+              Exchange Date:
+            </strong>
+            <span>{event.exchange_date || 'TBD'}</span>
           </div>
           <div>
-            <strong>Event ID:</strong>{' '}
+            <strong style="color: var(--gold-400); text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.35rem;">
+              Dispatch No:
+            </strong>
             <span style="font-family: var(--font-mono); font-size: 0.82rem;">{event.id}</span>
           </div>
         </div>
