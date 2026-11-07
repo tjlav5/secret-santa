@@ -32,9 +32,9 @@ export const APP_CSS = `
   --shadow-card: 0 8px 28px -6px rgba(22, 51, 41, 0.08), 0 2px 6px -1px rgba(22, 51, 41, 0.04);
   --shadow-elevated: 0 20px 44px -12px rgba(22, 51, 41, 0.16), 0 4px 12px -2px rgba(22, 51, 41, 0.06);
 
-  --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: ui-serif, 'Iowan Old Style', 'Apple Garamond', 'Baskerville', 'Palatino Linotype', 'Times New Roman', Georgia, serif;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
 }
 
 * {
